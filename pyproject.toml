@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "siqoq"
+version = "0.1.0.dev0"
+description = "Simulation-first infrastructure for Physical AI"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "Apache-2.0"}
+authors = [{name = "Siqoq contributors"}]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2.2",
+  "pytest>=8.3",
+  "ruff>=0.9",
+]
+
+[project.scripts]
+siqoq = "siqoq.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/siqoq"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
