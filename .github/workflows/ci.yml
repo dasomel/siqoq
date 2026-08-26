@@ -8,17 +8,88 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  quality:
+    name: Quality
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
           cache: pip
       - run: python -m pip install --upgrade pip
       - run: pip install -e '.[dev]'
       - run: ruff check .
-      - run: pytest
-      - run: python -m build
+
+  build-test:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux AMD64
+            os: ubuntu-24.04
+            expected_arch: x86_64
+          - name: Linux ARM64
+            os: ubuntu-24.04-arm
+            expected_arch: aarch64
+          - name: macOS AMD64
+            os: macos-15-intel
+            expected_arch: x86_64
+          - name: macOS ARM64
+            os: macos-15
+            expected_arch: arm64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Show runner platform
+        run: python -c "import platform; print(platform.platform()); print(platform.machine())"
+
+      - name: Verify architecture
+        env:
+          EXPECTED_ARCH: ${{ matrix.expected_arch }}
+        run: |
+          python - <<'PY'
+          import os
+          import platform
+
+          actual = platform.machine().lower()
+          expected = os.environ['EXPECTED_ARCH'].lower()
+          aliases = {
+              'x86_64': {'x86_64', 'amd64'},
+              'aarch64': {'aarch64', 'arm64'},
+              'arm64': {'aarch64', 'arm64'},
+          }
+          if actual not in aliases[expected]:
+              raise SystemExit(f'expected architecture {expected}, got {actual}')
+          print(f'architecture verified: {actual}')
+          PY
+
+      - name: Install development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      - name: Run tests
+        run: pytest
+
+      - name: Run hardware-free demo
+        run: siqoq demo
+
+      - name: Inspect runtime capabilities
+        run: siqoq inspect
+
+      - name: Build package
+        run: python -m build
