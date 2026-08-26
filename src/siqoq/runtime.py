@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
 import json
 import platform
-from typing import Sequence
+from collections.abc import Sequence
+from dataclasses import asdict, dataclass, field
 
 from .contracts import DeviceCapabilities
 
