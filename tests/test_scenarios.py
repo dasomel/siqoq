@@ -4,7 +4,6 @@ from siqoq.adapters import GeneratedSensor
 from siqoq.conformance import assert_sensor_adapter_conformance
 from siqoq.scenarios import JsonlFixtureSensor, run_fixture_scenario
 
-
 FIXTURE = Path("examples/scenarios/person-detection.jsonl")
 
 
