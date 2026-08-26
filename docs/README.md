@@ -11,6 +11,7 @@
 - [Architecture](architecture.md)
 - [Roadmap](roadmap.md)
 - [Development guide](development.md)
+- [Deterministic scenarios](scenarios.md)
 - [Project principles](principles.md)
 
 ## Specifications
