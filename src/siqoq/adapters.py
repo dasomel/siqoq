@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from pathlib import Path
 
 from .contracts import (
     ActionAdapter,
@@ -61,6 +62,22 @@ class MemoryTransport(EventTransport):
 
     def publish(self, event_json: str) -> None:
         self.messages.append(event_json)
+
+
+@dataclass
+class JsonlTransport(EventTransport):
+    """Append semantic events to a UTF-8 JSONL file without external services."""
+
+    path: Path
+
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
+
+    def publish(self, event_json: str) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with self.path.open("a", encoding="utf-8", newline="\n") as handle:
+            handle.write(event_json)
+            handle.write("\n")
 
 
 @dataclass
