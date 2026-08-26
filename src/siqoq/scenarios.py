@@ -22,7 +22,8 @@ class JsonlFixtureSensor:
 
     def _load(self) -> list[SensorSample]:
         samples: list[SensorSample] = []
-        for line_number, raw_line in enumerate(self.path.read_text(encoding="utf-8").splitlines(), 1):
+        lines = self.path.read_text(encoding="utf-8").splitlines()
+        for line_number, raw_line in enumerate(lines, 1):
             line = raw_line.strip()
             if not line or line.startswith("#"):
                 continue
