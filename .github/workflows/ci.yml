@@ -88,6 +88,9 @@ jobs:
       - name: Run hardware-free demo
         run: siqoq demo
 
+      - name: Run deterministic fixture scenario
+        run: siqoq scenario examples/scenarios/person-detection.jsonl --name ci-person-detection
+
       - name: Inspect runtime capabilities
         run: siqoq inspect
 
