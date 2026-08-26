@@ -22,17 +22,20 @@ class JsonlFixtureSensor:
 
     def _load(self) -> list[SensorSample]:
         samples: list[SensorSample] = []
-        lines = self.path.read_text(encoding="utf-8").splitlines()
+        try:
+            lines = self.path.read_text(encoding="utf-8").splitlines()
+        except OSError as exc:
+            raise ValueError(f"unable to read fixture '{self.path}': {exc}") from exc
+
         for line_number, raw_line in enumerate(lines, 1):
             line = raw_line.strip()
             if not line or line.startswith("#"):
                 continue
             try:
                 row = json.loads(line)
-            except json.JSONDecodeError as exc:
-                raise ValueError(f"invalid JSONL at line {line_number}: {exc.msg}") from exc
-            samples.append(
-                SensorSample(
+                if not isinstance(row, dict):
+                    raise ValueError("row must be a JSON object")
+                sample = SensorSample(
                     source=str(row["source"]),
                     kind=str(row["kind"]),
                     timestamp=str(row["timestamp"]),
@@ -40,8 +43,20 @@ class JsonlFixtureSensor:
                     payload=row.get("payload"),
                     metadata=row.get("metadata", {}),
                 )
-            )
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"invalid JSONL at line {line_number}: {exc.msg}") from exc
+            except KeyError as exc:
+                raise ValueError(
+                    f"invalid fixture at line {line_number}: missing field {exc.args[0]!r}"
+                ) from exc
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"invalid fixture at line {line_number}: {exc}") from exc
+            samples.append(sample)
         return samples
+
+    @property
+    def sample_count(self) -> int:
+        return len(self._samples)
 
     def read(self) -> SensorSample | None:
         if self._index >= len(self._samples):
@@ -49,6 +64,12 @@ class JsonlFixtureSensor:
         sample = self._samples[self._index]
         self._index += 1
         return sample
+
+
+def validate_fixture(path: str | Path) -> int:
+    """Validate a JSONL fixture and return its normalized sample count."""
+
+    return JsonlFixtureSensor(path).sample_count
 
 
 @dataclass(frozen=True, slots=True)
