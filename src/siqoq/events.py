@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import json
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
-import json
-from typing import Any, Mapping
+from typing import Any
 from uuid import uuid4
 
 
@@ -30,7 +31,7 @@ class SemanticEvent:
         sequence: int | None = None,
         sensor_kind: str | None = None,
         metadata: Mapping[str, Any] | None = None,
-    ) -> "SemanticEvent":
+    ) -> SemanticEvent:
         return cls(
             type="object.detected",
             source=source,
