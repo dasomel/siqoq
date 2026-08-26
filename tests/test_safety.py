@@ -1,7 +1,13 @@
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
-from siqoq.adapters import AllowListSafetyGate, GeneratedSensor, MemoryTransport, MockActionAdapter, StaticInference
+from siqoq.adapters import (
+    AllowListSafetyGate,
+    GeneratedSensor,
+    MemoryTransport,
+    MockActionAdapter,
+    StaticInference,
+)
 from siqoq.contracts import ActionRequest
 from siqoq.events import SemanticEvent
 from siqoq.pipeline import SiqoqPipeline
