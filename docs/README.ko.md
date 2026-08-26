@@ -11,6 +11,7 @@
 - [아키텍처](architecture.ko.md)
 - [로드맵](roadmap.ko.md)
 - [개발 가이드](development.ko.md)
+- [결정론적 시나리오](scenarios.ko.md)
 - [Project Principles](principles.md)
 
 ## 기술 명세
