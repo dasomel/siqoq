@@ -1,4 +1,10 @@
-from siqoq.adapters import AllowListSafetyGate, GeneratedSensor, MemoryTransport, MockActionAdapter, StaticInference
+from siqoq.adapters import (
+    AllowListSafetyGate,
+    GeneratedSensor,
+    MemoryTransport,
+    MockActionAdapter,
+    StaticInference,
+)
 from siqoq.pipeline import NoOpPolicy, SiqoqPipeline
 
 
