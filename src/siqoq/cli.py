@@ -3,7 +3,13 @@ from __future__ import annotations
 import argparse
 import json
 
-from .adapters import AllowListSafetyGate, GeneratedSensor, MemoryTransport, MockActionAdapter, StaticInference
+from .adapters import (
+    AllowListSafetyGate,
+    GeneratedSensor,
+    MemoryTransport,
+    MockActionAdapter,
+    StaticInference,
+)
 from .pipeline import NoOpPolicy, SiqoqPipeline
 from .runtime import RuntimeManifest, discover_capabilities
 
