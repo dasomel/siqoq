@@ -73,6 +73,25 @@ It is intended to be useful at several maturity levels:
 - **Physical:** sensors, MCU/GPIO, ROS 2 bridges and robots
 - **Fleet:** optional declarative deployment, GitOps and Kubernetes/K3s
 
+## Current implementation skeleton
+
+The architecture is no longer documentation-only. A dependency-light, hardware-free skeleton now provides the first executable boundaries:
+
+- vendor-neutral `SensorSample`, `Detection`, `ActionRequest`, and `ActionResult` contracts
+- `SensorAdapter`, `InferenceAdapter`, `EventTransport`, `Policy`, `SafetyGate`, and `ActionAdapter` protocols
+- generated sensor + deterministic static inference
+- versioned semantic-event envelope
+- in-memory transport
+- perception → event → policy → safety → action pipeline
+- safe-by-default `NoOpPolicy` and allow-list safety gate
+- mock action adapter that never touches physical hardware
+- runtime manifest and baseline capability discovery
+- `siqoq demo` hardware-free pipeline demo
+- `siqoq inspect` runtime/capability inspection
+- tests for the pipeline, safety boundary, and runtime bootstrap
+
+These are implementation scaffolds rather than frozen public APIs. The next step is to evolve them through versioned specifications and shared adapter conformance tests.
+
 ## Design principles
 
 - **Simulation first** — hardware must not block core development or testing.
@@ -142,11 +161,13 @@ Instead, it integrates them where useful and focuses on keeping the path from si
 
 Core documentation is maintained in English and Korean.
 
+- [Vision](docs/vision.md) / [비전](docs/vision.ko.md)
 - [Project name & pronunciation](docs/project-name.md) / [프로젝트명·발음·의미](docs/project-name.ko.md)
 - [Physical AI OSS landscape](docs/landscape.md) / [Physical AI OSS 생태계](docs/landscape.ko.md)
 - [Architecture](docs/architecture.md) / [아키텍처](docs/architecture.ko.md)
 - [Roadmap](docs/roadmap.md) / [로드맵](docs/roadmap.ko.md)
 - [Development guide](docs/development.md) / [개발 가이드](docs/development.ko.md)
+- [Contract specs](docs/specs/README.md) / [Contract 명세](docs/specs/README.ko.md)
 - [Project principles](docs/principles.md)
 - [Contributing](CONTRIBUTING.md)
 - [Security](SECURITY.md)
