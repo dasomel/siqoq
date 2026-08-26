@@ -14,7 +14,7 @@ Siqoq is an open-source experimentation infrastructure for building and validati
 
 The name is inspired by Arctic snow and wind imagery, especially the idea of **drifting snow**. Siqoq uses that image as a project metaphor: an AI workload should be able to move from simulation to a laptop, from a laptop to an edge device, and from the digital environment into the physical world without rewriting its core application contracts.
 
-The project does not rely on the name as a linguistic claim about a single unified Inuit language; Arctic languages and dialects are diverse. The name is used primarily as the project's identity and metaphor.
+Arctic Indigenous languages are diverse, so the project does not present the name as a universal translation across Inuit languages or dialects. See [Project name and pronunciation](docs/project-name.md) for the preferred wording and linguistic note.
 
 ## The problem
 
@@ -84,6 +84,7 @@ It is intended to be useful at several maturity levels:
 - **Safe physical boundary** — reasoning does not directly control physical hardware; actions pass through explicit adapters and policy/safety gates.
 - **Cloud-native where useful** — use containers, declarative configuration, GitOps, and observability when they solve a real operational problem, without making Kubernetes mandatory.
 - **Integration over replacement** — work with ROS 2, simulators, model runtimes, and hardware SDKs rather than rebuilding them.
+- **Reuse before build** — integrate mature OSS through adapters when another project already owns the problem well.
 
 ## Initial MVP
 
@@ -129,10 +130,11 @@ Siqoq is not intended to replace:
 
 - ROS 2
 - Isaac Sim or Gazebo
-- model training frameworks
+- LeRobot or robot-policy training frameworks
 - Kubernetes
 - model registries
 - robot/vendor hardware SDKs
+- complete robot-agent runtimes
 
 Instead, it integrates them where useful and focuses on keeping the path from simulation to edge and physical execution portable, observable, and testable.
 
@@ -140,6 +142,8 @@ Instead, it integrates them where useful and focuses on keeping the path from si
 
 Core documentation is maintained in English and Korean.
 
+- [Project name & pronunciation](docs/project-name.md) / [프로젝트명·발음·의미](docs/project-name.ko.md)
+- [Physical AI OSS landscape](docs/landscape.md) / [Physical AI OSS 생태계](docs/landscape.ko.md)
 - [Architecture](docs/architecture.md) / [아키텍처](docs/architecture.ko.md)
 - [Roadmap](docs/roadmap.md) / [로드맵](docs/roadmap.ko.md)
 - [Development guide](docs/development.md) / [개발 가이드](docs/development.ko.md)
