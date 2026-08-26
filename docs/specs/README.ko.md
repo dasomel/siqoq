@@ -4,6 +4,18 @@
 
 Siqoq은 구현 core는 작게 유지하되 경계는 명확하게 정의하는 것을 목표로 합니다. 이 디렉터리는 simulation, laptop, edge, physical system 사이를 연결하는 **안정적이고 versioned된 contract**를 관리합니다.
 
+## 현재 구현된 스켈레톤
+
+첫 code-level contract skeleton은 다음 파일에 들어가 있습니다.
+
+- `src/siqoq/contracts.py` — `SensorSample`, `Detection`, `ActionRequest`, `ActionResult`, `DeviceCapabilities` 및 adapter protocol
+- `src/siqoq/events.py` — versioned `SemanticEvent` envelope
+- `src/siqoq/pipeline.py` — perception → event → policy → safety → action 흐름
+- `src/siqoq/adapters.py` — generated sensor, static inference, in-memory transport, allow-list safety gate, mock action adapter
+- `src/siqoq/runtime.py` — runtime manifest와 dependency-free capability discovery
+
+이 구현들은 향후 public API를 확정한 것이 아니라 **확장 가능한 최소 골격**입니다. Issue #17에서 versioned specification과 공통 adapter conformance suite로 발전시킵니다.
+
 ## 예정된 명세
 
 ### Sensor Contract
@@ -26,15 +38,29 @@ Detection, classification, tracking, anomaly, state change 같은 model-independ
 초기 범위:
 
 - versioned envelope
-- event type / source
+- event ID / type / source
 - confidence / model provenance
 - correlation / trace ID
-- timestamp
+- timestamp / source sequence
 - 큰 raw artifact는 event body에 직접 넣기보다 reference 사용
 
 ### Action Contract
 
 Reasoning/policy가 실제 physical execution으로 넘어가기 전에 사용하는 request/result contract를 정의합니다.
+
+```text
+Decision
+  ↓
+ActionRequest
+  ↓
+SafetyGate
+  ↓
+ActionAdapter
+  ↓
+Physical hardware
+```
+
+현재 스켈레톤은 safe-by-default입니다. `NoOpPolicy`는 action을 만들지 않고, `AllowListSafetyGate`는 명시적으로 허용하지 않은 action을 모두 거부하며, `MockActionAdapter`는 실제 hardware를 전혀 건드리지 않습니다.
 
 초기 범위:
 
@@ -59,9 +85,13 @@ Siqoq workload를 portable하게 선언하는 형식을 정의합니다.
 - action capability
 - deployment profile
 
+현재 `RuntimeManifest`는 laptop profile bootstrap을 제공하고 `siqoq inspect` 명령으로 확인할 수 있습니다.
+
 ### Capability Contract
 
 Edge node, simulator, adapter가 무엇을 제공할 수 있는지 vendor-specific API를 core scheduler/runtime에 노출하지 않고 표현합니다.
+
+현재 dependency-free bootstrap은 host architecture만 탐지하고 accelerator/sensor/actuator는 vendor-specific probe가 추가되기 전까지 비워 둡니다.
 
 ## Versioning 원칙
 
