@@ -1,0 +1,2 @@
+{"source":"fixture.camera.front","kind":"image","timestamp":"2026-01-01T00:00:00+00:00","sequence":0,"payload":{"frame":"frame-000"},"metadata":{"origin":"fixture"}}
+{"source":"fixture.camera.front","kind":"image","timestamp":"2026-01-01T00:00:01+00:00","sequence":1,"payload":{"frame":"frame-001"},"metadata":{"origin":"fixture"}}

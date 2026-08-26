@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
 import json
+from collections.abc import Mapping
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
+from typing import Any
+from uuid import uuid4
 
 
 @dataclass(slots=True)
@@ -12,6 +15,11 @@ class SemanticEvent:
     object: str
     confidence: float
     timestamp: str
+    event_id: str = field(default_factory=lambda: str(uuid4()))
+    schema_version: str = "0.1"
+    sequence: int | None = None
+    sensor_kind: str | None = None
+    metadata: Mapping[str, Any] = field(default_factory=dict)
 
     @classmethod
     def detected(
@@ -20,13 +28,19 @@ class SemanticEvent:
         source: str,
         object_name: str,
         confidence: float,
-    ) -> "SemanticEvent":
+        sequence: int | None = None,
+        sensor_kind: str | None = None,
+        metadata: Mapping[str, Any] | None = None,
+    ) -> SemanticEvent:
         return cls(
             type="object.detected",
             source=source,
             object=object_name,
             confidence=confidence,
             timestamp=datetime.now(UTC).isoformat(),
+            sequence=sequence,
+            sensor_kind=sensor_kind,
+            metadata=metadata or {},
         )
 
     def to_json(self) -> str:

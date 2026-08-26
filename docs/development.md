@@ -17,9 +17,34 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev]'
 siqoq demo
+siqoq inspect
 ```
 
-The first demo uses generated/synthetic events and requires no camera or accelerator.
+`siqoq demo` runs the hardware-free perception pipeline using a generated sensor, deterministic static inference, semantic-event output, a no-op policy, and a mock-safe action path.
+
+`siqoq inspect` prints the current runtime manifest and best-effort local capability discovery without requiring vendor SDKs.
+
+## Current skeleton boundaries
+
+The initial implementation intentionally uses only lightweight Python contracts and mock adapters:
+
+```text
+GeneratedSensor
+      ↓
+StaticInference
+      ↓
+SemanticEvent
+      ↓
+MemoryTransport
+      ↓
+NoOpPolicy
+      ↓
+AllowListSafetyGate
+      ↓
+MockActionAdapter
+```
+
+This is not the final implementation architecture. It is the executable seam used to attach recorded video, webcam, ONNX Runtime, NATS/MQTT, simulation, Jetson/TensorRT, and physical action adapters in later issues.
 
 ## Development workflow
 
@@ -37,12 +62,20 @@ The first demo uses generated/synthetic events and requires no camera or acceler
 ruff check .
 pytest
 python -m build
+siqoq demo
+siqoq inspect
 ```
 
 ## Repository layout
 
 ```text
-src/siqoq/          core package
+src/siqoq/
+  contracts.py      vendor-neutral data/protocol contracts
+  events.py         semantic-event envelope
+  adapters.py       initial generated/mock adapters
+  pipeline.py       perception-to-action composition
+  runtime.py        runtime manifest/capability bootstrap
+  cli.py            local CLI
 examples/           runnable examples
 docs/               architecture and guides
 .github/             CI and contribution automation
@@ -58,6 +91,8 @@ Hardware support must be implemented behind an adapter and include one of:
 - recorded test data
 
 This keeps CI and basic development independent from device availability.
+
+The default action path must remain safe: physical actions require explicit configuration and must pass an action/safety boundary. Mock/no-op behavior is preferred for default development and CI.
 
 ## AI coding tools
 
