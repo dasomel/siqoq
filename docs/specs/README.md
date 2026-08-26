@@ -2,7 +2,19 @@
 
 **English** | [한국어](README.ko.md)
 
-Siqoq should remain small at the implementation core and explicit at its boundaries. This directory will hold the stable, versioned contracts that let simulation, laptops, edge devices, and physical systems interoperate.
+Siqoq should remain small at the implementation core and explicit at its boundaries. This directory holds the evolving contracts that let simulation, laptops, edge devices, and physical systems interoperate.
+
+## Current implementation skeleton
+
+The first code-level contract skeleton is now implemented in:
+
+- `src/siqoq/contracts.py` — `SensorSample`, `Detection`, `ActionRequest`, `ActionResult`, `DeviceCapabilities`, and adapter protocols
+- `src/siqoq/events.py` — versioned `SemanticEvent` envelope
+- `src/siqoq/pipeline.py` — perception → event → policy → safety → action composition
+- `src/siqoq/adapters.py` — generated sensor, static inference, in-memory transport, allow-list safety gate, and mock action adapter
+- `src/siqoq/runtime.py` — runtime manifest and dependency-free capability discovery
+
+These are intentionally minimal scaffolds, not frozen public APIs. Issue #17 will evolve them into explicit versioned specifications and a shared adapter conformance suite.
 
 ## Planned specifications
 
@@ -26,15 +38,29 @@ Defines model-independent perception events such as detection, classification, t
 Initial scope:
 
 - versioned envelope
-- event type and source
+- event ID, type, and source
 - confidence and model provenance
 - correlation/trace identifiers
-- timestamps
+- timestamps and source sequence
 - optional references to large/raw artifacts rather than embedding them by default
 
 ### Action Contract
 
 Defines requests and results crossing from reasoning/policy into potential physical execution.
+
+```text
+Decision
+  ↓
+ActionRequest
+  ↓
+SafetyGate
+  ↓
+ActionAdapter
+  ↓
+Physical hardware
+```
+
+The current skeleton is safe-by-default: `NoOpPolicy` emits no actions, `AllowListSafetyGate` allows nothing unless explicitly configured, and `MockActionAdapter` never touches hardware.
 
 Initial scope:
 
@@ -59,9 +85,13 @@ Potential fields:
 - action capabilities
 - deployment profile
 
+The current `RuntimeManifest` provides a laptop-profile bootstrap and can be inspected through `siqoq inspect`.
+
 ### Capability Contract
 
 Describes what an edge node, simulator, or adapter can provide without exposing vendor-specific APIs to the core scheduler/runtime.
+
+The dependency-free bootstrap currently detects host architecture and intentionally leaves accelerator/sensor/actuator discovery empty until adapter-specific probes are added.
 
 ## Versioning principles
 
@@ -75,8 +105,6 @@ Describes what an edge node, simulator, or adapter can provide without exposing 
 ## Conformance philosophy
 
 An adapter is not considered supported merely because it compiles. A supported adapter should pass a shared conformance suite for its contract.
-
-Examples:
 
 ```text
 RecordedVideoAdapter ─┐
