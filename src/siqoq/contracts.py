@@ -16,6 +16,16 @@ class SensorSample:
     payload: Any = None
     metadata: Mapping[str, Any] = field(default_factory=dict)
 
+    def __post_init__(self) -> None:
+        if not self.source.strip():
+            raise ValueError("sensor source must not be empty")
+        if not self.kind.strip():
+            raise ValueError("sensor kind must not be empty")
+        if not self.timestamp.strip():
+            raise ValueError("sensor timestamp must not be empty")
+        if self.sequence < 0:
+            raise ValueError("sensor sequence must be >= 0")
+
 
 @dataclass(frozen=True, slots=True)
 class Detection:
@@ -24,6 +34,12 @@ class Detection:
     label: str
     confidence: float
     attributes: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not self.label.strip():
+            raise ValueError("detection label must not be empty")
+        if not 0.0 <= self.confidence <= 1.0:
+            raise ValueError("detection confidence must be between 0 and 1")
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,6 +50,12 @@ class ActionRequest:
     target: str
     parameters: Mapping[str, Any] = field(default_factory=dict)
     correlation_id: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.action.strip():
+            raise ValueError("action must not be empty")
+        if not self.target.strip():
+            raise ValueError("action target must not be empty")
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,6 +69,14 @@ class ActionResult:
     detail: str = ""
     correlation_id: str | None = None
 
+    def __post_init__(self) -> None:
+        if not self.action.strip():
+            raise ValueError("action result action must not be empty")
+        if not self.target.strip():
+            raise ValueError("action result target must not be empty")
+        if not self.status.strip():
+            raise ValueError("action result status must not be empty")
+
 
 @dataclass(frozen=True, slots=True)
 class DeviceCapabilities:
@@ -56,6 +86,10 @@ class DeviceCapabilities:
     accelerator: str | None = None
     sensors: Sequence[str] = ()
     actuators: Sequence[str] = ()
+
+    def __post_init__(self) -> None:
+        if not self.architecture.strip():
+            raise ValueError("architecture must not be empty")
 
 
 class SensorAdapter(Protocol):
