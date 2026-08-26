@@ -12,6 +12,7 @@ from .adapters import (
 )
 from .pipeline import NoOpPolicy, SiqoqPipeline
 from .runtime import RuntimeManifest, discover_capabilities
+from .scenarios import run_fixture_scenario
 
 
 def run_demo() -> int:
@@ -45,11 +46,23 @@ def run_inspect() -> int:
     return 0
 
 
+def run_scenario(path: str, name: str) -> int:
+    summary = run_fixture_scenario(path, name=name)
+    print(summary.to_json())
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="siqoq")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("demo", help="Run the hardware-free perception pipeline demo")
     subparsers.add_parser("inspect", help="Show the local runtime manifest and capabilities")
+    scenario = subparsers.add_parser(
+        "scenario",
+        help="Run a deterministic JSONL fixture scenario",
+    )
+    scenario.add_argument("fixture", help="Path to a JSONL SensorSample fixture")
+    scenario.add_argument("--name", default="fixture", help="Scenario name for the JSON summary")
     return parser
 
 
@@ -59,6 +72,8 @@ def main() -> int:
         return run_demo()
     if args.command == "inspect":
         return run_inspect()
+    if args.command == "scenario":
+        return run_scenario(args.fixture, args.name)
     return 1
 
 
