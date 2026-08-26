@@ -62,6 +62,25 @@ Simulation / Recorded Data
                  Observability ◀───────┘
 ```
 
+## 현재 구현된 스켈레톤
+
+아키텍처를 문서로만 두지 않기 위해 외부 하드웨어나 추가 라이브러리가 없어도 실행되는 최소 골격을 구현했습니다.
+
+- vendor-neutral `SensorSample`, `Detection`, `ActionRequest`, `ActionResult` contract
+- `SensorAdapter`, `InferenceAdapter`, `EventTransport`, `Policy`, `SafetyGate`, `ActionAdapter` protocol
+- generated sensor + deterministic static inference
+- versioned semantic event envelope
+- in-memory event transport
+- perception → event → policy → safety → action pipeline
+- safe-by-default `NoOpPolicy` 및 allow-list safety gate
+- 실제 장비를 건드리지 않는 mock action adapter
+- runtime manifest + 기본 capability discovery
+- `siqoq demo` hardware-free pipeline demo
+- `siqoq inspect` runtime/capability inspection
+- pipeline, safety boundary, runtime 자동화 테스트
+
+현재 구현은 public API를 확정한 것이 아니라 실제 adapter와 runtime을 붙이기 위한 **contract-first skeleton**입니다.
+
 ## 핵심 설계 원칙
 
 - **Simulation first** — 실제 장비가 없어도 핵심 흐름을 개발하고 테스트할 수 있어야 합니다.
@@ -117,9 +136,13 @@ Siqoq은 ROS 2, Isaac Sim, Gazebo, Kubernetes, 모델 학습 프레임워크, �
 
 영문 문서를 기준 문서로 유지하면서 주요 문서는 한국어 버전을 함께 제공합니다.
 
+- [Vision](docs/vision.md) / [비전](docs/vision.ko.md)
 - [Architecture](docs/architecture.md) / [아키텍처](docs/architecture.ko.md)
 - [Roadmap](docs/roadmap.md) / [로드맵](docs/roadmap.ko.md)
 - [Development Guide](docs/development.md) / [개발 가이드](docs/development.ko.md)
+- [Project name](docs/project-name.md) / [프로젝트명](docs/project-name.ko.md)
+- [OSS landscape](docs/landscape.md) / [OSS 생태계](docs/landscape.ko.md)
+- [Contract specs](docs/specs/README.md) / [Contract 명세](docs/specs/README.ko.md)
 - [Project Principles](docs/principles.md)
 - [Contributing](CONTRIBUTING.md)
 - [Security](SECURITY.md)
