@@ -1,22 +1,36 @@
 # Architecture
 
-Siqoq is designed around a stable simulation-to-reality path.
+Siqoq is designed around a stable simulation-to-reality path. The same semantic
+contracts connect simulation, laptop development and edge hardware; only adapters and
+runtime acceleration change.
+
+## System context
+
+```mermaid
+flowchart LR
+    S["Simulation or sensor"] --> P["Perception runtime"]
+    P --> E["Semantic events"]
+    E --> R["Policy or agent"]
+    R --> G["Safety gate"]
+    G --> A["Action adapter"]
+    A --> W["Physical or simulated world"]
+    W -. feedback .-> S
+```
+
+The semantic event and action contracts are the stable center of the architecture.
+Sensors, transports, inference engines and hardware drivers remain replaceable.
 
 ## Core loop
 
-```text
-Simulation / Sensor
-        ↓
-    Perception
-        ↓
-   World State
-        ↓
- Reason / Policy
-        ↓
-      Action
-        ↓
- Physical World
-        └──────────────→ feedback
+```mermaid
+flowchart TB
+    I["Frame or sensor sample"] --> N["Normalize input"]
+    N --> M["Model inference"]
+    M --> E["Emit semantic event"]
+    E --> D["Decide action"]
+    D --> V["Validate policy and safety"]
+    V --> X["Execute through adapter"]
+    X -. telemetry and feedback .-> I
 ```
 
 ## Layers
@@ -112,6 +126,13 @@ sensor read
 OpenTelemetry is the preferred telemetry model, with Prometheus/Grafana-compatible metrics where useful.
 
 ## Deployment modes
+
+| Mode | Input | Runtime | Transport | Output |
+|---|---|---|---|---|
+| Laptop | Recorded media or webcam | CPU baseline | In-process/stdout | Mock or local action |
+| Simulation | Isaac Sim or Gazebo | CPU/GPU as available | Pluggable event bus | Virtual actuator |
+| Edge | Physical sensors | ONNX or accelerator adapter | NATS/MQTT/local | Hardware adapter |
+| Fleet (planned) | Multiple edge nodes | Declarative workloads | Managed messaging | GitOps-managed adapters |
 
 ### Laptop mode
 
