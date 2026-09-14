@@ -1,6 +1,6 @@
 # Implementation Status
 
-Last verified: 2026-09-09 against `main`
+Last verified: 2026-09-14 against `main`
 
 This snapshot records the executable scope currently present on the default branch. Siqoq is still an early-bootstrap / architecture-validation project; the target architecture and planned capabilities in `README.md` and `docs/roadmap.md` are not implementation claims.
 
