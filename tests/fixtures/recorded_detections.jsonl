@@ -1,0 +1,3 @@
+{"type":"object.detected","source":"recorded.camera.front","object":"person","confidence":0.91,"timestamp":"2026-01-01T00:00:00+00:00"}
+{"type":"object.detected","source":"recorded.camera.front","object":"box","confidence":0.72,"timestamp":"2026-01-01T00:00:01+00:00"}
+{"type":"object.detected","source":"recorded.camera.front","object":"person","confidence":0.88,"timestamp":"2026-01-01T00:00:02+00:00"}

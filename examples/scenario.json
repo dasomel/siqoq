@@ -1,0 +1,6 @@
+{
+  "adapter": "fixture",
+  "steps": 3,
+  "source_path": "tests/fixtures/recorded_detections.jsonl",
+  "output_path": "scenario-events.jsonl"
+}
