@@ -112,6 +112,7 @@ See:
 - [Roadmap](docs/roadmap.md)
 - [Development guide](docs/development.md)
 - [Project principles](docs/principles.md)
+- [Maturity tiers (S0–S5)](docs/maturity-tiers.md)
 - [Contributing](CONTRIBUTING.md)
 - [Security](SECURITY.md)
 
