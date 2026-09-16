@@ -18,6 +18,18 @@ dev = [
   "pytest>=8.3",
   "ruff>=0.9",
 ]
+vision = [
+  "opencv-python-headless>=4.9",
+  "onnxruntime>=1.17",
+]
+transport = [
+  "nats-py>=2.9",
+  "paho-mqtt>=2.1",
+]
+observability = [
+  "opentelemetry-api>=1.27",
+  "opentelemetry-sdk>=1.27",
+]
 
 [project.scripts]
 siqoq = "siqoq.cli:main"
