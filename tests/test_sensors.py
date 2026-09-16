@@ -35,3 +35,13 @@ def test_adapter_is_deterministic_with_fixed_timestamp(adapter: SensorAdapter) -
     first = [event.to_json() for event in adapter.read(count=2)]
     second = [event.to_json() for event in adapter.read(count=2)]
     assert first == second
+
+
+def test_fixture_sensor_adapter_reports_line_number_for_malformed_rows(tmp_path: Path) -> None:
+    path = tmp_path / "bad.jsonl"
+    path.write_text(
+        '{"timestamp":"t","source":"s","object":"person","confidence":2}\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match=r"line 1: confidence"):
+        list(FixtureSensorAdapter(path).read(count=1))
