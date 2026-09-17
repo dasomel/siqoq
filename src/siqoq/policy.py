@@ -4,6 +4,11 @@ from dataclasses import dataclass
 
 from .events import SemanticEvent
 
+#: Action Contract v0 version (docs/specs/action-contract.md). Bump on
+#: breaking changes to `MockAction`'s required fields or `decide()`'s
+#: signature; additive fields do not require a bump.
+CONTRACT_VERSION = 0
+
 #: D1: mock-only by construction. No actuator client exists in this module or
 #: anywhere else in the package; extending this to a real actuator is a design
 #: change requiring an explicit safety review (see AGENTS.md "Engineering rules").
@@ -15,6 +20,15 @@ _DEFAULT_ACTION = "noop"
 
 @dataclass(slots=True, frozen=True)
 class MockAction:
+    """Action Contract v0 output envelope.
+
+    ``mock`` is the safety-sensitive field of this contract: it is
+    REVIEWED and pinned to ``True`` for every producer in this codebase
+    (see D1 above and docs/specs/action-contract.md "Safety review"). A
+    future real-actuator adapter MUST NOT flip this default silently; doing
+    so is a design change requiring explicit safety sign-off.
+    """
+
     action: str
     event_type: str
     mock: bool = True

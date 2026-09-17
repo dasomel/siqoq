@@ -19,6 +19,15 @@ REQUIRED_FIELDS = ("type", "source", "object", "confidence", "timestamp", "schem
 #: or additional optional fields without failing.
 OPTIONAL_FIELDS = ("correlation_id", "metadata")
 
+#: Semantic Event Contract v0 provenance convention (docs/specs/semantic-event-contract.md):
+#: producers SHOULD set ``metadata["provenance"]`` to one of these values to
+#: distinguish simulated/synthetic sources from real/recorded ones. This is a
+#: convention on the existing free-form `metadata` dict, not a new required
+#: field, so it is additive and does not bump SCHEMA_VERSION.
+PROVENANCE_SIMULATED = "simulated"
+PROVENANCE_RECORDED = "recorded"
+PROVENANCE_PHYSICAL = "physical"
+
 _events_emitted_counter = telemetry.get_events_emitted_counter()
 
 
@@ -28,7 +37,9 @@ class SemanticEvent:
 
     Required fields: type, source, object, confidence, timestamp, schema_version.
     Optional fields: correlation_id (for tracing a detection across stages),
-    metadata (free-form dict for vendor-agnostic extra context).
+    metadata (free-form dict for vendor-agnostic extra context; producers
+    SHOULD set metadata["provenance"] to PROVENANCE_SIMULATED/_RECORDED/
+    _PHYSICAL — see docs/specs/semantic-event-contract.md).
 
     `to_json()` output is additive-only across schema versions: existing keys
     keep their meaning and position is not guaranteed, but old consumers that

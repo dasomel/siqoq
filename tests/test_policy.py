@@ -1,7 +1,15 @@
 import pytest
 
 from siqoq.events import SemanticEvent
-from siqoq.policy import SafetyGate, decide
+from siqoq.policy import CONTRACT_VERSION, SafetyGate, decide
+
+
+def test_action_contract_version_is_declared_and_mock_is_reviewed() -> None:
+    """Action Contract v0 (docs/specs/action-contract.md): the safety-
+    sensitive `mock` field is pinned True; decide() never produces False."""
+    assert isinstance(CONTRACT_VERSION, int)
+    event = SemanticEvent.detected(source="sim.camera.front", object_name="person", confidence=0.9)
+    assert decide(event).mock is True
 
 
 def test_decide_is_deterministic_and_mock_only() -> None:

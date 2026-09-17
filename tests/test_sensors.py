@@ -2,7 +2,13 @@ from pathlib import Path
 
 import pytest
 
-from siqoq.sensors import FixtureSensorAdapter, GeneratedSensorAdapter, SensorAdapter
+from siqoq.events import REQUIRED_FIELDS
+from siqoq.sensors import (
+    CONTRACT_VERSION,
+    FixtureSensorAdapter,
+    GeneratedSensorAdapter,
+    SensorAdapter,
+)
 
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "recorded_detections.jsonl"
 
@@ -28,6 +34,23 @@ def test_adapter_events_share_semantic_event_shape(adapter: SensorAdapter) -> No
         assert isinstance(event.object, str) and event.object
         assert isinstance(event.confidence, float)
         assert isinstance(event.timestamp, str) and event.timestamp
+
+
+@pytest.mark.parametrize("adapter", _adapters())
+def test_adapter_satisfies_sensor_contract_v0(adapter: SensorAdapter) -> None:
+    """Sensor Contract v0 (docs/specs/sensor-contract.md): every fake and
+    real/recorded adapter must yield events carrying all REQUIRED_FIELDS
+    from the Semantic Event Contract, with a valid confidence range and a
+    non-empty timestamp/source/object, regardless of adapter backend."""
+    for event in adapter.read(count=1):
+        for field_name in REQUIRED_FIELDS:
+            assert hasattr(event, field_name), f"missing required field: {field_name}"
+        assert 0 <= event.confidence <= 1
+        assert isinstance(event.schema_version, int)
+
+
+def test_sensor_contract_version_is_declared() -> None:
+    assert isinstance(CONTRACT_VERSION, int)
 
 
 @pytest.mark.parametrize("adapter", _adapters())

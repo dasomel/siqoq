@@ -8,9 +8,24 @@ from typing import Protocol
 
 from .events import SemanticEvent
 
+#: Sensor Contract v0 version. Bump on breaking changes to the `SensorAdapter`
+#: method signature or its documented event-shape guarantees (see
+#: docs/specs/sensor-contract.md). Additive, backward-compatible changes
+#: (e.g. a new optional method with a default) do not require a bump.
+CONTRACT_VERSION = 0
+
 
 class SensorAdapter(Protocol):
-    """Yields SemanticEvent samples regardless of whether the source is simulated or physical."""
+    """Sensor Contract v0 (event-level layer): yields SemanticEvent samples
+    regardless of whether the source is simulated or physical.
+
+    This is the higher, event-level sensor contract. `siqoq.video_sensors`
+    defines a lower, frame-level contract (`FrameSensor`) for sources that
+    hand back raw frames instead of semantic events; a `FrameSensor` is
+    typically composed with an `InferenceAdapter` to produce the
+    `SemanticEvent`s this protocol yields. See docs/specs/sensor-contract.md
+    for the full contract and how the two layers relate.
+    """
 
     def read(self, *, count: int) -> Iterator[SemanticEvent]: ...
 

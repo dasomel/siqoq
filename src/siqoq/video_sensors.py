@@ -29,6 +29,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
+#: Sensor Contract v0 version for the frame-level layer. Bump on breaking
+#: changes to `FrameSensor`'s open/read/close lifecycle or `Frame`/
+#: `FrameMetadata` required fields (see docs/specs/sensor-contract.md).
+CONTRACT_VERSION = 0
+
 
 @dataclass(slots=True, frozen=True)
 class FrameMetadata:
