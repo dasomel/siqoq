@@ -6,7 +6,7 @@ compatibility: Requires the Siqoq checkout and Python 3.12 project toolchain; ha
 metadata:
   openforge-scope: project
   openforge-owner: dasomel/siqoq
-  openforge-maturity: draft
+  openforge-maturity: verified
   openforge-version: "1"
 ---
 
@@ -46,7 +46,7 @@ metadata:
 
 Separate package/lint/unit evidence from simulation pipeline evidence and physical device/edge evidence. Do not claim Jetson, ROS 2, TensorRT, Kubernetes, sensor, or actuator correctness merely because the Python package builds.
 
-This skill remains `draft` until the MVP workflow is replayed from a fresh session with at least one successful simulated path and one recorded failure/edge regression.
+This skill was promoted to `verified` after a fresh-session replay (see `docs/evaluations/sim-to-edge-skill-verification.md`) exercised both a successful simulated/generated sensor path and a recorded fixture path, and reproduced the required failure/edge regression (missing fixture, malformed record) live. `verified` covers only the hardware-free simulation/laptop MVP path; it makes no claim about camera capture, Jetson/ARM edge deployment, ONNX/TensorRT, ROS 2, real brokers, or actuators, none of which are implemented.
 
 ## Stop / Escalate When
 
