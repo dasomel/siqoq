@@ -26,5 +26,10 @@ siqoq scenario run --config examples/scenario.json
 ```
 
 The command emits a sorted JSON summary containing event count, event type
-counts, and a SHA-256 hash of the emitted event sequence. The fixture path is
-therefore suitable for CI assertions and future simulation adapters.
+counts, per-action decision counts, a coarse wall-clock duration (a CI
+sanity signal, not a benchmark claim), and a SHA-256 hash of the emitted
+event sequence. The fixture path is therefore suitable for CI assertions and
+future simulation adapters.
+
+See `docs/specs/scenario-catalog.md` for the named scenario/benchmark
+catalog built on top of this format.

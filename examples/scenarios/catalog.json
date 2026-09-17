@@ -1,0 +1,40 @@
+{
+  "scenarios": [
+    {
+      "id": "recorded-video-detection",
+      "description": "Person/object detection replayed from a recorded fixture (stand-in for recorded video input).",
+      "config_path": "fixture_detection.json",
+      "expected_outcome": "success",
+      "min_event_count": 3
+    },
+    {
+      "id": "simulated-camera-detection",
+      "description": "Simulated camera adapter producing the same semantic-event contract as recorded/physical sources.",
+      "config_path": "simulated_camera.json",
+      "expected_outcome": "success",
+      "min_event_count": 3
+    },
+    {
+      "id": "sensor-disconnect",
+      "description": "Sensor source unavailable (missing fixture file) surfaces a clear error instead of fabricating events.",
+      "config_path": "disconnect_missing_fixture.json",
+      "expected_outcome": "error",
+      "error_type": "FileNotFoundError"
+    },
+    {
+      "id": "inference-fallback-on-bad-input",
+      "description": "Malformed recorded sample surfaces a clear validation error rather than a fabricated detection, standing in for an inference-timeout/fallback path until a real timeout harness exists.",
+      "config_path": "inference_fallback_malformed.json",
+      "expected_outcome": "error",
+      "error_type": "ValueError"
+    },
+    {
+      "id": "action-rejected-by-safety-gate",
+      "description": "Safety gate disabled for mock actions: every detected event's action decision is forced to noop.",
+      "config_path": "safety_gate_rejected.json",
+      "expected_outcome": "success",
+      "min_event_count": 3,
+      "expect_all_actions_rejected": true
+    }
+  ]
+}

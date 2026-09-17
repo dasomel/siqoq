@@ -1,0 +1,5 @@
+{
+  "adapter": "fixture",
+  "steps": 2,
+  "source_path": "tests/fixtures/malformed_detection.jsonl"
+}
