@@ -30,3 +30,14 @@ def test_detected_event_works_regardless_of_telemetry_availability() -> None:
 
 def test_demo_runs_regardless_of_telemetry_availability() -> None:
     assert run_demo() == 0
+
+
+def test_gpu_is_not_present_on_this_cpu_only_environment() -> None:
+    # This test environment has no nvidia-smi on PATH; the interface must honestly
+    # report "unavailable" rather than fabricating a value.
+    assert telemetry.gpu_is_present() is False
+
+
+def test_gpu_utilization_gauge_never_requires_gpu_tooling() -> None:
+    gauge = telemetry.get_gpu_utilization_gauge()
+    assert gauge is not None
