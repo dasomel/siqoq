@@ -49,6 +49,25 @@ docs/               architecture and guides
 tests/               automated tests
 ```
 
+## Container build
+
+A multi-stage `Dockerfile` at the repo root builds the base package (no vendor/hardware
+extras) for both `amd64` and `arm64`. Local reproduction of the CI build:
+
+```bash
+docker buildx build --platform linux/amd64,linux/arm64 .
+```
+
+By default the image runs `siqoq demo`. Override the command to run a scenario instead:
+
+```bash
+docker run --rm -v "$PWD/examples:/app/examples" <image> scenario run --config examples/scenario.json
+```
+
+CI builds and smoke-tests the `amd64` image only (`siqoq demo`); `arm64` is built via QEMU
+emulation and is build-verified, not run-tested on real ARM64 hardware. A Jetson/CUDA base
+image is a separate profile, tracked in a later spike.
+
 ## Hardware-specific work
 
 Hardware support must be implemented behind an adapter and include one of:

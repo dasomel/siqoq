@@ -30,3 +30,17 @@ jobs:
         with:
           name: siqoq-simulation-evidence
           path: artifacts/
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      # Build both architectures via QEMU emulation on the amd64 runner.
+      # Not pushed: no registry credential is configured in this repo.
+      - run: docker buildx build --platform linux/amd64,linux/arm64 -t siqoq:ci .
+      # Load only the amd64 image locally to smoke-test `siqoq demo`.
+      # arm64 is build-only/QEMU-emulated here, not run-tested on real hardware.
+      - run: docker buildx build --platform linux/amd64 --load -t siqoq:amd64 .
+      - run: docker run --rm siqoq:amd64 demo
