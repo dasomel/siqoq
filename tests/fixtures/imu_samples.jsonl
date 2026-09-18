@@ -1,0 +1,2 @@
+{"timestamp": "t0", "linear_acceleration": [0.0, 0.0, 9.8], "angular_velocity": [0.0, 0.0, 0.0]}
+{"timestamp": "t1", "linear_acceleration": [0.1, 0.0, 9.8], "angular_velocity": [0.0, 0.1, 0.0]}
