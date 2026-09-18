@@ -35,6 +35,24 @@
       "expected_outcome": "success",
       "min_event_count": 3,
       "expect_all_actions_rejected": true
+    },
+    {
+      "id": "scene-single-object",
+      "kind": "scene",
+      "version": "1.0.0",
+      "description": "Simulated-camera scene: a single-step simulated environment producing one detection event.",
+      "config_path": "scene_single_object.json",
+      "expected_outcome": "success",
+      "min_event_count": 1
+    },
+    {
+      "id": "scene-multi-step-sequence",
+      "kind": "scene",
+      "version": "1.0.0",
+      "description": "Simulated-camera scene: a multi-step simulated sequence producing several detection events in order.",
+      "config_path": "scene_multi_step_sequence.json",
+      "expected_outcome": "success",
+      "min_event_count": 5
     }
   ]
 }

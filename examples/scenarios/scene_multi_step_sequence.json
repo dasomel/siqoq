@@ -1,0 +1,5 @@
+{
+  "adapter": "fixture",
+  "steps": 5,
+  "source_path": "tests/fixtures/scene_multi_step_sequence.jsonl"
+}

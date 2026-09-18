@@ -143,6 +143,14 @@ class CatalogEntry:
     ``expected_outcome`` is "success" or "error". For "error", ``error_type``
     must name one of ``_KNOWN_ERROR_TYPES``. For "success", ``min_event_count``
     and/or ``expect_all_actions_rejected`` narrow what counts as a pass.
+
+    ``kind`` distinguishes a "scene" (a named, versioned bundle of sensor
+    fixture(s) + expected outcome standing in for a simulated environment,
+    see docs/specs/scenario-catalog.md#scenes) from an ad-hoc "scenario"
+    (the default). ``version`` is the scene's own version string, required
+    when ``kind == "scene"`` so scenes can evolve without breaking older
+    references. Both reuse the same catalog file and runner as scenarios —
+    no parallel format.
     """
 
     id: str
@@ -152,6 +160,8 @@ class CatalogEntry:
     min_event_count: int | None = None
     error_type: str | None = None
     expect_all_actions_rejected: bool = False
+    kind: str = "scenario"
+    version: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict) -> CatalogEntry:
@@ -163,6 +173,8 @@ class CatalogEntry:
             min_event_count=data.get("min_event_count"),
             error_type=data.get("error_type"),
             expect_all_actions_rejected=data.get("expect_all_actions_rejected", False),
+            kind=data.get("kind", "scenario"),
+            version=data.get("version"),
         )
 
 

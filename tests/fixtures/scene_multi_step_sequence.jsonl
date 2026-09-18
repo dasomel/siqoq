@@ -1,0 +1,5 @@
+{"type":"object.detected","source":"sim.camera.front","object":"person","confidence":0.94,"timestamp":"2026-01-01T00:00:00+00:00"}
+{"type":"object.detected","source":"sim.camera.front","object":"box","confidence":0.81,"timestamp":"2026-01-01T00:00:01+00:00"}
+{"type":"object.detected","source":"sim.camera.side","object":"person","confidence":0.89,"timestamp":"2026-01-01T00:00:02+00:00"}
+{"type":"object.detected","source":"sim.camera.front","object":"person","confidence":0.90,"timestamp":"2026-01-01T00:00:03+00:00"}
+{"type":"object.detected","source":"sim.camera.side","object":"box","confidence":0.77,"timestamp":"2026-01-01T00:00:04+00:00"}

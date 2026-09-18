@@ -150,6 +150,66 @@ device to target, and should reuse this same catalog format at that point.
 실제 모델과 대상 디바이스를 갖추면 실행 가능해질 것으로 예상되며, 그 시점에도
 동일한 카탈로그 형식을 재사용해야 한다.
 
+## Scenes / 씬 (issue #41)
+
+A **scene** is a named, versioned bundle of sensor fixture(s) + expected
+outcome that stands in for a simulated environment, as distinct from an
+ad-hoc scenario config. Scenes reuse the exact same catalog entry and
+`ScenarioConfig` machinery as any other catalog row — there is no parallel
+scene format or runner. A catalog entry becomes a scene by setting
+`"kind": "scene"` and a `"version"` string:
+
+**씬(scene)**은 시뮬레이션된 환경을 대표하는, 이름이 있고 버전이 매겨진 센서
+픽스처 묶음과 기대 결과다. 임시 시나리오 설정과 구분되지만, 카탈로그
+항목/`ScenarioConfig` 메커니즘을 그대로 재사용한다. 별도의 씬 형식이나
+러너는 없다. `"kind": "scene"`과 `"version"` 문자열을 지정하면 카탈로그
+항목이 씬이 된다:
+
+```json
+{
+  "id": "scene-single-object",
+  "kind": "scene",
+  "version": "1.0.0",
+  "description": "...",
+  "config_path": "scene_single_object.json",
+  "expected_outcome": "success",
+  "min_event_count": 1
+}
+```
+
+- `kind` defaults to `"scenario"` when omitted, so all pre-existing entries
+  are unaffected.
+  `kind`을 생략하면 기본값은 `"scenario"`이므로 기존 항목에는 영향이 없다.
+- `version` is a scene's own version string (e.g. semver), independent of
+  the package version, so a scene's fixture bundle can evolve without
+  silently changing what an older reference to the same `id` meant.
+  `version`은 패키지 버전과 무관한 씬 자체의 버전 문자열(예: semver)이며,
+  같은 `id`를 가리키는 이전 참조의 의미가 조용히 바뀌지 않도록 씬의 픽스처
+  묶음이 독립적으로 진화할 수 있게 한다.
+- Scenes are runnable via the same `load_catalog`/`run_catalog_entry` used
+  by every other entry, and are exercised by
+  `tests/test_scenario_catalog.py`.
+  씬은 다른 모든 항목과 동일한 `load_catalog`/`run_catalog_entry`로 실행
+  가능하며, `tests/test_scenario_catalog.py`에서 검증된다.
+
+Two scenes are implemented, both hardware-free and deterministic:
+
+두 개의 씬이 구현되어 있으며, 모두 하드웨어 없이 결정론적으로 실행된다:
+
+| id | Represents / 대응하는 시나리오 | Outcome |
+|---|---|---|
+| `scene-single-object` | simulated camera, single-object scene (one step) | success, 1 event |
+| `scene-multi-step-sequence` | simulated camera, multi-step sequence (five steps) | success, >= 5 events |
+
+`tests/test_scenario_catalog.py::test_scene_sequence_hash_is_deterministic_across_runs`
+runs each scene twice, independently, and asserts the resulting
+`sequence_hash` values are identical — the acceptance criterion from issue
+#41.
+
+`tests/test_scenario_catalog.py::test_scene_sequence_hash_is_deterministic_across_runs`는
+각 씬을 독립적으로 두 번 실행하여 결과 `sequence_hash`가 동일한지 검증한다.
+이슈 #41의 인수 조건이다.
+
 ## Running the catalog / 카탈로그 실행
 
 ```console
