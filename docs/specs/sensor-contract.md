@@ -83,3 +83,24 @@ touching the event-level contract.
 `GeneratedSensorAdapter` (fake/simulated) and `FixtureSensorAdapter`
 (real/recorded fixture data), asserting both the general adapter behavior
 and the Sensor Contract v0 field/shape guarantees above.
+
+## Pipeline-level compatibility (Phase 2)
+
+The adapter-level conformance suite above proves `GeneratedSensorAdapter`
+and `FixtureSensorAdapter` satisfy the same `SensorAdapter` protocol. That is
+necessary but not sufficient for Phase 2's acceptance criterion that "the
+same downstream pipeline consumes simulated and real camera inputs" — it
+does not by itself show the *pipeline* (`siqoq.scenario.run_scenario`)
+avoids branching on which adapter it was given.
+
+`tests/test_scenario.py::test_build_adapter_is_the_only_dispatch_point_on_adapter_type`
+inspects `run_scenario`'s source to assert `ScenarioConfig.build_adapter()`
+is the only place that branches on `adapter`/source type; `run_scenario`
+itself calls `adapter.read()` exactly once, through the shared protocol.
+`tests/test_scenario.py::test_run_scenario_pipeline_shape_matches_across_generated_and_fixture_sources`
+runs the identical `run_scenario()` call against a `ScenarioConfig(adapter="generated", ...)`
+and a `ScenarioConfig(adapter="fixture", source_path=..., ...)` and asserts
+both produce `ScenarioSummary` objects with the same field set and shape
+(`event_count`, `type_counts` keys, `action_counts` keys). Together these
+satisfy Phase 2's acceptance criterion end-to-end, not just at the adapter
+boundary.

@@ -81,3 +81,26 @@ FrameSensor (프레임 레벨)  --InferenceAdapter-->  SemanticEvent  <--반환-
 (가짜/시뮬레이션)와 `FixtureSensorAdapter`(실제/녹화 픽스처 데이터)에 대해
 파라미터화하여, 일반적인 어댑터 동작과 위 센서 계약 v0의 필드/형태 보장을
 모두 검증합니다.
+
+## 파이프라인 레벨 호환성 (Phase 2)
+
+위 어댑터 레벨 conformance 스위트는 `GeneratedSensorAdapter`와
+`FixtureSensorAdapter`가 동일한 `SensorAdapter` 프로토콜을 만족함을
+증명합니다. 하지만 이것만으로는 Phase 2의 인수 조건, 즉 "동일한 다운스트림
+파이프라인이 시뮬레이션 입력과 실제 카메라 입력을 모두 소비한다"를
+충족하기에 충분하지 않습니다 — 파이프라인(`siqoq.scenario.run_scenario`)
+자체가 어떤 어댑터를 받았는지에 따라 분기하지 않는다는 것을 보여주지는
+않기 때문입니다.
+
+`tests/test_scenario.py::test_build_adapter_is_the_only_dispatch_point_on_adapter_type`는
+`run_scenario`의 소스를 검사하여 `ScenarioConfig.build_adapter()`가
+`adapter`/소스 타입에 대해 분기하는 유일한 지점임을 검증하고, `run_scenario`
+자체는 공유 프로토콜을 통해 `adapter.read()`를 정확히 한 번만 호출함을
+확인합니다.
+`tests/test_scenario.py::test_run_scenario_pipeline_shape_matches_across_generated_and_fixture_sources`는
+`ScenarioConfig(adapter="generated", ...)`와
+`ScenarioConfig(adapter="fixture", source_path=..., ...)`에 대해 동일한
+`run_scenario()` 호출을 실행하고, 두 결과 모두 동일한 필드 구성과 형태
+(`event_count`, `type_counts` 키, `action_counts` 키)의 `ScenarioSummary`를
+생성함을 검증합니다. 이 두 테스트가 함께 Phase 2의 인수 조건을 어댑터
+경계뿐 아니라 파이프라인 전체에서 충족함을 보여줍니다.

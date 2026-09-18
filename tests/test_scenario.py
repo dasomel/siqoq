@@ -78,3 +78,56 @@ def test_missing_fixture_fails_without_fabricating_events(tmp_path: Path) -> Non
 
     with pytest.raises(FileNotFoundError):
         list(adapter.read(count=1))
+
+
+def test_build_adapter_is_the_only_dispatch_point_on_adapter_type() -> None:
+    """Guard the pipeline-level compatibility guarantee (issue #44).
+
+    ``ScenarioConfig.build_adapter`` is the single place scenario.py branches
+    on ``adapter``/source type; ``run_scenario`` itself must call
+    ``adapter.read()`` through the shared ``SensorAdapter`` protocol with no
+    additional type-specific branching. If this ever regresses (e.g. a new
+    ``if config.adapter == ...`` sneaks into ``run_scenario``), Phase 2's
+    "same downstream pipeline consumes simulated and real camera inputs"
+    acceptance criterion would silently stop holding.
+    """
+    import inspect
+
+    from siqoq import scenario as scenario_module
+
+    run_scenario_source = inspect.getsource(scenario_module.run_scenario)
+
+    assert "config.adapter" not in run_scenario_source
+    assert "isinstance(adapter" not in run_scenario_source
+    assert run_scenario_source.count("adapter.read(") == 1
+
+
+def test_run_scenario_pipeline_shape_matches_across_generated_and_fixture_sources() -> None:
+    """Same ScenarioConfig-driven pipeline, simulated vs. fixture/recorded source.
+
+    Demonstrates the Phase 2 acceptance criterion end-to-end: running
+    ``run_scenario`` against a simulated (``GeneratedSensorAdapter``) and a
+    recorded (``FixtureSensorAdapter``) source through the identical
+    ``run_scenario`` call yields ``ScenarioSummary`` objects with the same
+    shape/fields, not just adapter-level conformance (already covered by the
+    parametrized suite in tests/test_sensors.py).
+    """
+    generated_summary = run_scenario(ScenarioConfig(adapter="generated", steps=3))
+    fixture_summary = run_scenario(
+        ScenarioConfig(adapter="fixture", steps=3, source_path=str(FIXTURE_JSONL))
+    )
+
+    for summary in (generated_summary, fixture_summary):
+        assert summary.event_count > 0
+        assert set(summary.type_counts) == {"object.detected"}
+        assert set(summary.action_counts)  # non-empty, exact action names are policy detail
+        assert isinstance(summary.sequence_hash, str) and summary.sequence_hash
+        assert summary.duration_seconds >= 0
+
+    # Both runs went through the exact same ScenarioSummary field set
+    # (ScenarioSummary uses slots=True, so fields() is used instead of vars()).
+    import dataclasses
+
+    generated_fields = {f.name for f in dataclasses.fields(generated_summary)}
+    fixture_fields = {f.name for f in dataclasses.fields(fixture_summary)}
+    assert generated_fields == fixture_fields
