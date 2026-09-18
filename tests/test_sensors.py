@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from siqoq.events import REQUIRED_FIELDS
+from siqoq.events import PROVENANCE_SIMULATED, REQUIRED_FIELDS
 from siqoq.sensors import (
     CONTRACT_VERSION,
     FixtureSensorAdapter,
@@ -58,6 +58,25 @@ def test_adapter_is_deterministic_with_fixed_timestamp(adapter: SensorAdapter) -
     first = [event.to_json() for event in adapter.read(count=2)]
     second = [event.to_json() for event in adapter.read(count=2)]
     assert first == second
+
+
+def test_generated_adapter_is_deterministic_and_simulated_provenance_ready() -> None:
+    """Simulation Adapter Contract v0 (docs/specs/simulation-adapter-contract.md):
+    GeneratedSensorAdapter, given a fixed timestamp, yields a byte-for-byte
+    identical event sequence across independent runs, and every event's
+    shape is compatible with tagging metadata["provenance"] =
+    PROVENANCE_SIMULATED without violating the Sensor Contract v0 event
+    shape."""
+    adapter = GeneratedSensorAdapter(timestamp="2026-01-01T00:00:00+00:00")
+
+    first = [event.to_json() for event in adapter.read(count=3)]
+    second = [event.to_json() for event in adapter.read(count=3)]
+    assert first == second
+
+    for event in adapter.read(count=1):
+        event.metadata["provenance"] = PROVENANCE_SIMULATED
+        assert event.metadata["provenance"] == PROVENANCE_SIMULATED
+        assert event.timestamp == "2026-01-01T00:00:00+00:00"
 
 
 def test_fixture_sensor_adapter_reports_line_number_for_malformed_rows(tmp_path: Path) -> None:

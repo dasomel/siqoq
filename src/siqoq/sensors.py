@@ -73,7 +73,27 @@ class SensorSample:
 
 @dataclass(slots=True)
 class GeneratedSensorAdapter:
-    """Wraps today's synthetic demo behavior behind the SensorAdapter interface."""
+    """Wraps today's synthetic demo behavior behind the SensorAdapter interface.
+
+    Reference simulation adapter for the Simulation Adapter Contract v0
+    (docs/specs/simulation-adapter-contract.md): a `SensorAdapter`
+    specialization for simulated/synthetic sources, distinguished from
+    recorded/physical sources by provenance (callers SHOULD tag output
+    ``metadata["provenance"] = PROVENANCE_SIMULATED``, see `siqoq.events`),
+    not by a different interface.
+
+    Satisfies the contract's determinism requirement: passing a fixed
+    `timestamp` makes every event yielded by `read()` carry that exact
+    value instead of ambient clock time, so two independent runs with the
+    same construction parameters produce an identical, byte-for-byte
+    reproducible event sequence (verified by
+    `tests/test_sensors.py::test_adapter_is_deterministic_with_fixed_timestamp`
+    and
+    `test_generated_adapter_is_deterministic_and_simulated_provenance_ready`).
+    Leaving `timestamp` unset falls back to ambient clock time via
+    `SemanticEvent.detected()`, which is fine for demos but MUST NOT be
+    relied upon for CI assertions.
+    """
 
     source: str = "sim.camera.front"
     object_name: str = "person"
