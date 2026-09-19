@@ -2,7 +2,17 @@
 
 Siqoq follows the OpenForge context-efficient agent engineering model. It is still in early bootstrap / architecture validation, so preserve explicit interfaces and avoid prematurely hardening one hardware/vendor path into the platform.
 
-Read `README.md`, `docs/architecture.md`, `docs/principles.md`, `docs/development.md`, the matching project skill under `.agents/skills/`, and the relevant issue/spec before editing.
+Inspect only the repository guidance, architecture/development document, matching project skill under `.agents/skills/`, and issue/spec that are relevant to the current task.
+
+
+## Instruction routing
+
+- `AGENTS.md` is the canonical portable repository contract.
+- Load detailed documents and `.agents/skills/` only when they are relevant to the current task; do not preload them by default.
+- Tool-specific adapters must contain only runtime-specific behavior and must not duplicate this contract.
+- Deterministic requirements belong in scripts, tests, linters, policy, or CI when they can be enforced reliably.
+
+For simulation/recorded/physical sensor interfaces, vision inference, semantic events/event bus, edge-runtime portability, or physical-AI pipeline changes, load `.agents/skills/siqoq-sim-to-edge-workflow/SKILL.md`.
 
 ## Product and architecture boundaries
 
