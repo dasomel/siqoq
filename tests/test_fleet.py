@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from siqoq.capabilities import RuntimeCapabilities
-from siqoq.fleet import FleetEntry, FleetInventory
+from siqoq.fleet import FleetEntry, FleetInventory, aggregate_results
 
 EXAMPLE_INVENTORY = Path(__file__).resolve().parents[1] / "examples" / "fleet" / "inventory.jsonl"
 
@@ -112,3 +112,69 @@ def test_cli_fleet_query_prints_matching_node_ids() -> None:
     )
     payload = json.loads(result.stdout)
     assert payload == ["edge-node-01"]
+
+
+def test_aggregate_results_sums_node_summaries(tmp_path: Path) -> None:
+    (tmp_path / "node-01.json").write_text(
+        json.dumps(
+            {
+                "event_count": 3,
+                "type_counts": {"detected": 2, "zone_entered": 1},
+                "action_counts": {"noop": 2, "alert": 1},
+            }
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "node-02.json").write_text(
+        json.dumps(
+            {
+                "event_count": 2,
+                "type_counts": {"detected": 1, "zone_exited": 1},
+                "action_counts": {"noop": 1, "alert": 1},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    summary = aggregate_results(tmp_path)
+    assert summary.node_count == 2
+    assert summary.total_events == 5
+    assert summary.event_type_totals == {"detected": 3, "zone_entered": 1, "zone_exited": 1}
+    assert summary.action_outcome_totals == {"noop": 3, "alert": 2}
+
+
+def test_aggregate_results_skips_malformed_json(tmp_path: Path, capsys) -> None:
+    (tmp_path / "valid.json").write_text(
+        json.dumps({"event_count": 1, "type_counts": {}, "action_counts": {}}),
+        encoding="utf-8",
+    )
+    (tmp_path / "broken.json").write_text("{not json", encoding="utf-8")
+
+    summary = aggregate_results(tmp_path)
+    assert summary.node_count == 1
+    assert "warning: skipping" in capsys.readouterr().err
+
+
+def test_aggregate_results_empty_directory_is_zero_summary(tmp_path: Path) -> None:
+    assert aggregate_results(tmp_path).to_dict() == {
+        "node_count": 0,
+        "total_events": 0,
+        "event_type_totals": {},
+        "action_outcome_totals": {},
+    }
+
+
+def test_cli_fleet_observe_prints_json(tmp_path: Path) -> None:
+    (tmp_path / "node.json").write_text(
+        json.dumps(
+            {"event_count": 4, "type_counts": {"detected": 4}, "action_counts": {"noop": 4}}
+        ),
+        encoding="utf-8",
+    )
+    result = subprocess.run(
+        [sys.executable, "-m", "siqoq.cli", "fleet", "observe", "--results-dir", str(tmp_path)],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert json.loads(result.stdout)["total_events"] == 4

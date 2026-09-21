@@ -14,6 +14,7 @@ discovery shape.
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -104,4 +105,54 @@ class FleetInventory:
         return matches
 
 
-__all__ = ["FleetEntry", "FleetInventory"]
+@dataclass(slots=True, frozen=True)
+class FleetObservabilitySummary:
+    """Aggregated scenario observability reported by a fleet of nodes."""
+
+    node_count: int
+    total_events: int
+    event_type_totals: dict[str, int]
+    action_outcome_totals: dict[str, int]
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "node_count": self.node_count,
+            "total_events": self.total_events,
+            "event_type_totals": self.event_type_totals,
+            "action_outcome_totals": self.action_outcome_totals,
+        }
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict(), ensure_ascii=False, sort_keys=True)
+
+
+def aggregate_results(results_dir: str | Path) -> FleetObservabilitySummary:
+    """Aggregate per-node ``ScenarioSummary.to_json()`` files in a directory."""
+
+    node_count = 0
+    total_events = 0
+    event_type_totals: dict[str, int] = {}
+    action_outcome_totals: dict[str, int] = {}
+    for result_path in sorted(Path(results_dir).glob("*.json")):
+        try:
+            payload = json.loads(result_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"warning: skipping {result_path}: invalid JSON ({exc})", file=sys.stderr)
+            continue
+
+        node_count += 1
+        total_events += int(payload["event_count"])
+        for name, count in payload.get("type_counts", {}).items():
+            event_type_totals[name] = event_type_totals.get(name, 0) + int(count)
+        for name, count in payload.get("action_counts", {}).items():
+            action_outcome_totals[name] = action_outcome_totals.get(name, 0) + int(count)
+
+    return FleetObservabilitySummary(
+        node_count=node_count,
+        total_events=total_events,
+        event_type_totals=event_type_totals,
+        action_outcome_totals=action_outcome_totals,
+    )
+
+
+__all__ = ["FleetEntry", "FleetInventory", "FleetObservabilitySummary", "aggregate_results"]
