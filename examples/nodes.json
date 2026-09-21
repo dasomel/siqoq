@@ -1,0 +1,20 @@
+{
+  "laptop": {
+    "os_name": "Darwin",
+    "arch": "arm64",
+    "vision_extra_available": false,
+    "transport_nats_available": false,
+    "transport_mqtt_available": false,
+    "observability_extra_available": true,
+    "gpu_probe_tool_available": false
+  },
+  "edge-gpu": {
+    "os_name": "Linux",
+    "arch": "aarch64",
+    "vision_extra_available": true,
+    "transport_nats_available": true,
+    "transport_mqtt_available": false,
+    "observability_extra_available": true,
+    "gpu_probe_tool_available": true
+  }
+}
