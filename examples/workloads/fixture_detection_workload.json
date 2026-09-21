@@ -1,0 +1,10 @@
+{
+  "name": "fixture-detection-laptop",
+  "scenario_config_path": "examples/scenarios/fixture_detection.json",
+  "required_capabilities": {
+    "vision_extra_available": false
+  },
+  "resource_hints": {
+    "min_memory_mb": 512
+  }
+}
