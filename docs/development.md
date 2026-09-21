@@ -78,6 +78,30 @@ Hardware support must be implemented behind an adapter and include one of:
 
 This keeps CI and basic development independent from device availability.
 
+## Simulation CI gating
+
+CI already fails the build on any scenario-catalog regression: the `pytest` step in
+`.github/workflows/ci.yml` runs the full test suite, including
+[`tests/test_scenario_catalog.py`](../tests/test_scenario_catalog.py), which loads every
+entry from [`examples/scenarios/catalog.json`](../examples/scenarios/catalog.json) and
+asserts each one passes. A failing scenario fails `pytest`'s exit code, which fails the
+CI job — no separate gating job is needed.
+
+A PR touching any of the following "risky" paths should get extra scrutiny on the
+scenario-catalog results before merge, since a regression there is exactly what the
+catalog is designed to catch:
+
+- `src/siqoq/sensors.py`
+- `src/siqoq/policy.py`
+- `src/siqoq/scenario.py`
+- `src/siqoq/actuation.py`
+- `src/siqoq/video_sensors.py`
+- `src/siqoq/spatial_sensors.py`
+
+When reviewing such a PR, confirm the CI `pytest` step (and its uploaded
+`siqoq-simulation-evidence` artifact) is green before merging, rather than assuming the
+scenario catalog still holds.
+
 ## AI coding tools
 
 AI coding assistants are welcome, but contributors remain responsible for correctness, licensing, security, tests, and reviewability. Do not commit secrets, copied proprietary code, or generated large binary assets.
