@@ -14,6 +14,8 @@ from .scenario import ScenarioConfig, run_scenario
 from .skills import classify, list_catalog
 from .trace import build_trace
 from .transport import StdoutTransport
+from .ui import DashboardConfig
+from .ui import serve as serve_dashboard
 from .workload import WorkloadSpec
 
 
@@ -109,6 +111,22 @@ def run_scenario_command(config_path: str) -> int:
 
 def run_capabilities_command() -> int:
     print(json.dumps(discover().to_dict(), indent=2))
+    return 0
+
+
+def run_ui_serve_command(
+    host: str, port: int, fleet_inventory: str | None, fleet_results_dir: str | None,
+    scenario_catalog: str | None,
+) -> int:
+    serve_dashboard(
+        host=host,
+        port=port,
+        config=DashboardConfig(
+            fleet_inventory_path=fleet_inventory,
+            fleet_results_dir=fleet_results_dir,
+            scenario_catalog_path=scenario_catalog,
+        ),
+    )
     return 0
 
 
@@ -223,6 +241,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="Include the event's raw metadata (verbose, non-default; may leak sensitive data)",
     )
 
+    ui_parser = subparsers.add_parser("ui", help="Local read-only web dashboard")
+    ui_subparsers = ui_parser.add_subparsers(dest="ui_command", required=True)
+    ui_serve_parser = ui_subparsers.add_parser(
+        "serve", help="Serve the dashboard until interrupted (Ctrl+C)"
+    )
+    ui_serve_parser.add_argument(
+        "--host", default="127.0.0.1", help="Bind host (default: localhost only)"
+    )
+    ui_serve_parser.add_argument(
+        "--port", type=int, default=8000, help="Bind port (default: 8000)"
+    )
+    ui_serve_parser.add_argument(
+        "--fleet-inventory", default=None, help="Optional path to a fleet inventory JSONL file"
+    )
+    ui_serve_parser.add_argument(
+        "--fleet-results-dir", default=None, help="Optional path to per-node scenario result files"
+    )
+    ui_serve_parser.add_argument(
+        "--scenario-catalog", default=None, help="Optional path to a scenario catalog JSON file"
+    )
+
     return parser
 
 
@@ -251,6 +290,11 @@ def main() -> int:
     if args.command == "trace" and args.trace_command == "build":
         return run_trace_build_command(
             args.event_json, args.action_json, args.include_metadata
+        )
+    if args.command == "ui" and args.ui_command == "serve":
+        return run_ui_serve_command(
+            args.host, args.port, args.fleet_inventory, args.fleet_results_dir,
+            args.scenario_catalog,
         )
     return 1
 

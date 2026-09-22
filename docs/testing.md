@@ -41,6 +41,7 @@ siqoq placement check --nodes examples/nodes.json --require vision_extra_availab
 siqoq skills list
 siqoq skills classify --event-type object.detected
 siqoq trace build --event-json <path> [--action-json <path>] [--include-metadata]
+siqoq ui serve [--port 8000] [--fleet-inventory <path>] [--scenario-catalog <path>]
 ```
 
 `trace build` redacts event metadata by default; pass `--include-metadata` only

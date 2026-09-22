@@ -41,6 +41,7 @@ siqoq placement check --nodes examples/nodes.json --require vision_extra_availab
 siqoq skills list
 siqoq skills classify --event-type object.detected
 siqoq trace build --event-json <path> [--action-json <path>] [--include-metadata]
+siqoq ui serve [--port 8000] [--fleet-inventory <path>] [--scenario-catalog <path>]
 ```
 
 `trace build`는 기본적으로 이벤트 메타데이터를 리댁션합니다. 디버깅을 위해 원본
