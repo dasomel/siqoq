@@ -111,6 +111,7 @@ See:
 - [Architecture](docs/architecture.md)
 - [Roadmap](docs/roadmap.md)
 - [Development guide](docs/development.md)
+- [Testing](docs/testing.md)
 - [Project principles](docs/principles.md)
 - [Maturity tiers (S0–S5)](docs/maturity-tiers.md)
 - [Contributing](CONTRIBUTING.md)

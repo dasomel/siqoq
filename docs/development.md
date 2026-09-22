@@ -39,6 +39,9 @@ pytest
 python -m build
 ```
 
+See [Testing](testing.md) for the full local/CI verification flow, optional
+extras, CLI smoke commands, and the container build.
+
 ## Repository layout
 
 ```text
