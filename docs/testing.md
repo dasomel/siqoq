@@ -58,14 +58,19 @@ Phase 6 (issue #66); no separate gating job exists or is needed.
 ## Container build
 
 ```bash
-make container       # docker buildx build --platform linux/amd64,linux/arm64 .
-make container-run   # build the amd64 image and run `siqoq demo` inside it
+make container              # docker buildx build --platform linux/amd64,linux/arm64 .
+make container-run          # build the amd64 image and run `siqoq demo` inside it (matches CI)
+make container-run-native   # build+run for the detected host architecture, no emulation
 ```
 
 CI builds both architectures via QEMU emulation; only amd64 is actually
 run-tested (see `.github/workflows/ci.yml`'s `container` job and
 `docs/evaluations/jetson-deployment-profile.md` for why arm64/Jetson stops at
-build-only here).
+build-only here). `container-run` intentionally forces amd64 for CI parity —
+on an arm64 host (e.g. Apple Silicon) this runs under QEMU and prints a
+harmless `platform ... does not match the detected host platform` warning.
+Use `container-run-native` for local iteration instead; it detects `uname -m`
+and builds/runs for that architecture directly, with no emulation warning.
 
 ## What a green run does and does not prove
 

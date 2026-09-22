@@ -58,13 +58,19 @@ siqoq trace build --event-json <path> [--action-json <path>] [--include-metadata
 ## 컨테이너 빌드
 
 ```bash
-make container       # docker buildx build --platform linux/amd64,linux/arm64 .
-make container-run   # amd64 이미지를 빌드하고 그 안에서 `siqoq demo` 실행
+make container              # docker buildx build --platform linux/amd64,linux/arm64 .
+make container-run          # amd64 이미지를 빌드하고 그 안에서 `siqoq demo` 실행 (CI와 동일)
+make container-run-native   # 현재 호스트 아키텍처로 빌드+실행, 에뮬레이션 없음
 ```
 
 CI는 QEMU 에뮬레이션으로 두 아키텍처를 모두 빌드하지만, 실제 실행 테스트는
 amd64만 합니다(`.github/workflows/ci.yml`의 `container` 잡과, arm64/Jetson이
 왜 빌드까지만 머무는지는 `docs/evaluations/jetson-deployment-profile.md` 참고).
+`container-run`은 CI와 동일하게 amd64를 강제하므로, arm64 호스트(예: Apple
+Silicon)에서는 QEMU로 에뮬레이션되면서 `platform ... does not match the
+detected host platform`이라는 무해한 경고가 출력됩니다. 로컬에서 반복 테스트할
+때는 `container-run-native`를 쓰세요 — `uname -m`을 감지해서 해당 아키텍처로
+바로 빌드/실행하므로 에뮬레이션 경고가 없습니다.
 
 ## 통과가 증명하는 것 / 증명하지 않는 것
 
