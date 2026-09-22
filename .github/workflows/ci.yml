@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
       # Build both architectures via QEMU emulation on the amd64 runner.
       # Not pushed: no registry credential is configured in this repo.
       - run: docker buildx build --platform linux/amd64,linux/arm64 -t siqoq:ci .
