@@ -4,7 +4,7 @@ import hashlib
 import json
 import time
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from .policy import SafetyGate, decide
@@ -191,14 +191,21 @@ def load_catalog(path: str | Path) -> list[CatalogEntry]:
     return [CatalogEntry.from_dict(item) for item in data["scenarios"]]
 
 
-def run_catalog_entry(entry: CatalogEntry, *, base_dir: str | Path) -> CatalogResult:
+def run_catalog_entry(
+    entry: CatalogEntry, *, base_dir: str | Path, write_output: bool = True
+) -> CatalogResult:
     """Run one catalog entry's scenario and check it against its expectation.
 
     ``base_dir`` resolves ``entry.config_path`` (catalog entries reference
     scenario config files by a path relative to the catalog file itself).
+    ``write_output=False`` runs the scenario without touching
+    ``config.output_path``, for callers that must not have file-write side
+    effects (e.g. a read-only HTTP GET).
     """
     config_path = Path(base_dir) / entry.config_path
     config = ScenarioConfig.from_json(config_path)
+    if not write_output:
+        config = replace(config, output_path=None)
 
     try:
         summary = run_scenario(config)
