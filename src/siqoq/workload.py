@@ -2,8 +2,9 @@
 
 A `WorkloadSpec` names which scenario config to run (reusing `ScenarioConfig`
 from `siqoq.scenario`, not reinventing it) plus the runtime capabilities
-that must be `True` on the target node (checked against
-`siqoq.capabilities.RuntimeCapabilities`, from `siqoq.capabilities.discover()`).
+that must exactly match (`True` or `False`) on the target node (checked
+against `siqoq.capabilities.RuntimeCapabilities`, from
+`siqoq.capabilities.discover()`).
 It does not require Kubernetes to author, validate, or run: it is a plain
 JSON file plus a pure-data validation function.
 
@@ -25,9 +26,11 @@ class WorkloadSpec:
     """A portable, declarative unit of work.
 
     ``required_capabilities`` is a subset of `RuntimeCapabilities`' boolean
-    fields that must be `True` on the target node (e.g.
-    ``{"vision_extra_available": true}``). ``resource_hints`` is free-form
-    and advisory only — it is never enforced by `validate_against`.
+    fields that must exactly equal the given value on the target node (e.g.
+    ``{"vision_extra_available": true}`` requires it to be `True`, and
+    ``{"vision_extra_available": false}`` requires it to be `False`).
+    ``resource_hints`` is free-form and advisory only — it is never enforced
+    by `validate_against`.
     """
 
     name: str
