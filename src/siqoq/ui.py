@@ -64,7 +64,11 @@ def _scenario_catalog_snapshot(catalog_path: str | None) -> dict[str, Any]:
     if not path.exists():
         return {"configured": True, "available": False, "reason": f"not found: {catalog_path}"}
     entries = load_catalog(path)
-    results = [run_catalog_entry(entry, base_dir=path.parent) for entry in entries]
+    # GET /api/snapshot must stay read-only (see module docstring): never let
+    # a catalog-referenced scenario config's output_path write to the host.
+    results = [
+        run_catalog_entry(entry, base_dir=path.parent, write_output=False) for entry in entries
+    ]
     return {
         "configured": True,
         "available": True,

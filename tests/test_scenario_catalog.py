@@ -1,8 +1,9 @@
+import json
 from pathlib import Path
 
 import pytest
 
-from siqoq.scenario import CatalogResult, load_catalog, run_catalog_entry
+from siqoq.scenario import CatalogEntry, CatalogResult, load_catalog, run_catalog_entry
 
 CATALOG_PATH = Path(__file__).parent.parent / "examples" / "scenarios" / "catalog.json"
 
@@ -71,3 +72,38 @@ def test_scene_sequence_hash_is_deterministic_across_runs(scene_id: str) -> None
     assert first.passed and second.passed
     assert first.summary is not None and second.summary is not None
     assert first.summary.sequence_hash == second.summary.sequence_hash
+
+
+def _write_generated_scenario_config(base_dir: Path, output_path: Path) -> CatalogEntry:
+    config_path = base_dir / "scenario.json"
+    config_path.write_text(
+        json.dumps({"adapter": "generated", "steps": 3, "output_path": str(output_path)}),
+        encoding="utf-8",
+    )
+    return CatalogEntry(
+        id="tmp-generated",
+        description="tmp scenario for write_output tests",
+        config_path="scenario.json",
+        expected_outcome="success",
+        min_event_count=3,
+    )
+
+
+def test_run_catalog_entry_with_write_output_false_does_not_write_file(tmp_path: Path) -> None:
+    output_path = tmp_path / "out.jsonl"
+    entry = _write_generated_scenario_config(tmp_path, output_path)
+
+    result = run_catalog_entry(entry, base_dir=tmp_path, write_output=False)
+
+    assert result.passed, result.detail
+    assert not output_path.exists()
+
+
+def test_run_catalog_entry_default_still_writes_file(tmp_path: Path) -> None:
+    output_path = tmp_path / "out.jsonl"
+    entry = _write_generated_scenario_config(tmp_path, output_path)
+
+    result = run_catalog_entry(entry, base_dir=tmp_path)
+
+    assert result.passed, result.detail
+    assert output_path.exists()
