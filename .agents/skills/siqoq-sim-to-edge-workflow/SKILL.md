@@ -46,7 +46,7 @@ metadata:
 
 Separate package/lint/unit evidence from simulation pipeline evidence and physical device/edge evidence. Do not claim Jetson, ROS 2, TensorRT, Kubernetes, sensor, or actuator correctness merely because the Python package builds.
 
-This skill was promoted to `verified` after a fresh-session replay (see `docs/evaluations/sim-to-edge-skill-verification.md`) exercised both a successful simulated/generated sensor path and a recorded fixture path, and reproduced the required failure/edge regression (missing fixture, malformed record) live. `verified` covers only the hardware-free simulation/laptop MVP path; it makes no claim about camera capture, Jetson/ARM edge deployment, ONNX/TensorRT, ROS 2, real brokers, or actuators, none of which are implemented.
+`verified` covers only the hardware-free simulation/laptop MVP path: the simulated/generated and recorded-fixture sources, including the missing-fixture and malformed-record failure paths (`docs/evaluations/sim-to-edge-skill-verification.md`). Adapters for USB webcam capture (`UsbWebcamFrameSensor`), OpenCV/ONNX Runtime inference (`OnnxCvInferenceAdapter`), and NATS/MQTT transport exist behind optional extras but are outside that verification. Jetson/ARM edge deployment, TensorRT, ROS 2, and physical actuation (only `MockActuatorAdapter` and the stub `RealGpioAdapter` exist) are not implemented.
 
 ## Stop / Escalate When
 
