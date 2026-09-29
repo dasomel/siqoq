@@ -6,15 +6,23 @@ to localhost by default. Serves live data from the existing modules
 placeholder content. There are no write endpoints and no authentication;
 exposing this beyond localhost is an explicit operator choice outside this
 module's scope (see docs/specs/web-dashboard.md).
+
+Routes are a fixed allowlist (``_PAGE_RESOURCES`` / `_ASSET_RESOURCES``), not
+a filesystem path derived from the request: an unrecognized path — including
+any `../` traversal attempt — can never match a dict key, so it always falls
+through to 404 rather than reading an arbitrary package file.
 """
 
 from __future__ import annotations
 
+import importlib.resources
 import json
 from dataclasses import dataclass
+from functools import cache
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 from .capabilities import discover
 from .fleet import FleetInventory, aggregate_results
@@ -92,65 +100,62 @@ def build_snapshot(config: DashboardConfig) -> dict[str, Any]:
     }
 
 
-_PAGE_TEMPLATE = """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>siqoq dashboard (read-only)</title>
-<style>
-body {{ font-family: system-ui, sans-serif; margin: 2rem; color: #1a1a1a; }}
-h1 {{ font-size: 1.25rem; }}
-h2 {{ font-size: 1rem; margin-top: 2rem; border-bottom: 1px solid #ccc; }}
-pre {{ background: #f5f5f5; padding: 0.75rem; overflow-x: auto; }}
-.note {{ color: #666; font-size: 0.85rem; }}
-</style>
-</head>
-<body>
-<h1>siqoq dashboard</h1>
-<p class="note">Read-only. Localhost by default. Data below is live from this
-process's modules, not fabricated.</p>
-<h2>Capabilities</h2>
-<pre id="capabilities"></pre>
-<h2>Skill catalog</h2>
-<pre id="skills"></pre>
-<h2>Fleet inventory</h2>
-<pre id="fleet_inventory"></pre>
-<h2>Fleet observability</h2>
-<pre id="fleet_observability"></pre>
-<h2>Scenario catalog results</h2>
-<pre id="scenario_catalog"></pre>
-<script>
-fetch("/api/snapshot").then(r => r.json()).then(data => {{
-  for (const key of Object.keys(data)) {{
-    const el = document.getElementById(key);
-    if (el) el.textContent = JSON.stringify(data[key], null, 2);
-  }}
-}});
-</script>
-</body>
-</html>
-"""
+#: GET routes that serve a full HTML page, mapped to their packaged resource
+#: filename (kept flat in the package root, alongside ui.py).
+_PAGE_RESOURCES: dict[str, str] = {
+    "/": "ui_page.html",
+    "/guide": "guide_page.html",
+}
+
+#: GET routes under /assets/, mapped to (packaged resource path, Content-Type).
+#: This dict IS the allowlist: `do_GET` only ever loads a name found here, so
+#: no request-derived string ever reaches a filesystem/resource lookup.
+_ASSET_RESOURCES: dict[str, tuple[str, str]] = {
+    "/assets/app.css": ("assets/app.css", "text/css; charset=utf-8"),
+    "/assets/app.js": ("assets/app.js", "text/javascript; charset=utf-8"),
+    "/assets/i18n.js": ("assets/i18n.js", "text/javascript; charset=utf-8"),
+}
+
+
+@cache
+def _resource_bytes(relative_path: str) -> bytes:
+    """Load one packaged resource file, cached by its fixed relative path.
+
+    Cached: pages/assets are static per-process (only `/api/snapshot` is
+    live), so re-reading them from disk on every request would be wasted
+    I/O. `relative_path` is always one of the literal strings in
+    `_PAGE_RESOURCES`/`_ASSET_RESOURCES` above, never request-derived.
+    """
+    resource = importlib.resources.files("siqoq")
+    for part in relative_path.split("/"):
+        resource = resource.joinpath(part)
+    return resource.read_text(encoding="utf-8").encode("utf-8")
 
 
 def make_handler(config: DashboardConfig) -> type[BaseHTTPRequestHandler]:
     class DashboardHandler(BaseHTTPRequestHandler):
+        def _send(self, body: bytes, content_type: str) -> None:
+            self.send_response(200)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
         def do_GET(self) -> None:  # noqa: N802 - stdlib method name
-            if self.path == "/":
-                body = _PAGE_TEMPLATE.encode("utf-8")
-                self.send_response(200)
-                self.send_header("Content-Type", "text/html; charset=utf-8")
-                self.send_header("Content-Length", str(len(body)))
-                self.end_headers()
-                self.wfile.write(body)
+            path = urlsplit(self.path).path
+
+            if path in _PAGE_RESOURCES:
+                self._send(_resource_bytes(_PAGE_RESOURCES[path]), "text/html; charset=utf-8")
                 return
-            if self.path == "/api/snapshot":
+            if path == "/api/snapshot":
                 body = json.dumps(build_snapshot(config)).encode("utf-8")
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json")
-                self.send_header("Content-Length", str(len(body)))
-                self.end_headers()
-                self.wfile.write(body)
+                self._send(body, "application/json")
                 return
+            if path in _ASSET_RESOURCES:
+                resource_path, content_type = _ASSET_RESOURCES[path]
+                self._send(_resource_bytes(resource_path), content_type)
+                return
+
             self.send_response(404)
             self.end_headers()
 

@@ -5,20 +5,22 @@ docs/architecture.md ("Sensor adapters"): a source-agnostic ``FrameSensor``
 interface with an explicit open/read/close lifecycle and normalized frame
 metadata, so downstream inference code never sees vendor-specific types.
 
-Real container/codec decoding (e.g. MP4/H.264) and real UVC camera capture
-both require dependencies not currently approved in pyproject.toml (e.g.
-opencv-python, PyAV, pyuvc). To stay hardware- and dependency-free:
+Real container/codec decoding (e.g. MP4/H.264) still requires a dependency
+not currently approved in pyproject.toml (e.g. PyAV). To stay
+dependency-free for that path:
 
 - ``RecordedVideoFileSensor`` reads a deterministic JSONL frame fixture
   (one JSON object per line: width/height/format/payload) rather than
   decoding a real video container. This is enough to exercise the adapter
   contract and CI without a physical camera or new heavy dependencies.
-- ``UsbWebcamFrameSensor`` is a stub backend: it documents the intended
-  contract and raises ``NotImplementedError`` on ``open()``, pointing to a
-  follow-up issue for the real capture backend.
+- ``UsbWebcamFrameSensor`` is a real OpenCV (``cv2.VideoCapture``) backend,
+  gated behind the optional ``vision`` extra (``pip install -e '.[vision]'``).
+  The import is deferred to ``open()`` so importing this module never
+  requires OpenCV to be installed (see ``siqoq.inference.OnnxCvInferenceAdapter``
+  for the same pattern).
 - ``MockWebcamFrameSensor`` is the mock/fake backend required by
   docs/development.md's "Hardware-specific work" rule so the webcam side of
-  the interface can still be exercised without hardware.
+  the interface can still be exercised without hardware or OpenCV installed.
 """
 
 from __future__ import annotations
@@ -26,6 +28,7 @@ from __future__ import annotations
 import base64
 import json
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Protocol
 
@@ -129,29 +132,73 @@ class RecordedVideoFileSensor:
 
 @dataclass(slots=True)
 class UsbWebcamFrameSensor:
-    """USB/UVC webcam adapter contract, backed by a real capture stub.
+    """USB/UVC webcam adapter backed by OpenCV's ``cv2.VideoCapture``.
 
-    A real implementation needs a UVC/camera capture dependency (e.g.
-    opencv-python's VideoCapture or pyuvc) that is not yet approved for this
-    project (see pyproject.toml). Use ``MockWebcamFrameSensor`` for
-    hardware-free development and CI; wire this class to a real backend in
-    a follow-up once a dependency is approved.
+    Requires the optional ``vision`` extra (``pip install -e '.[vision]'``).
+    The ``cv2`` import is deferred to ``open()`` so importing this module
+    never requires OpenCV to be installed; only opening this sensor does
+    (same pattern as ``OnnxCvInferenceAdapter`` in ``siqoq.inference``). Use
+    ``MockWebcamFrameSensor`` for hardware-free development and CI.
+
+    Read-only w.r.t. actuation: frames come from ``VideoCapture.read()``. The
+    optional ``width``/``height`` call ``VideoCapture.set()``, which may
+    reconfigure the capture device (UVC/V4L2 ioctl); leave them unset to avoid it.
     """
 
-    device: str = "/dev/video0"
+    device: int | str = 0
+    source: str = "webcam.usb"
+    max_frames: int | None = None
+    width: int | None = None
+    height: int | None = None
+    _cap: object | None = None
+    _index: int = 0
 
     def open(self) -> None:
-        raise NotImplementedError(
-            "Real USB/UVC capture is not implemented; no approved capture "
-            "dependency yet. Use MockWebcamFrameSensor for development, or "
-            "implement this backend in a follow-up (see module docstring)."
-        )
+        try:
+            import cv2
+        except ImportError as exc:
+            raise ImportError(
+                "UsbWebcamFrameSensor requires the 'vision' extra: pip install -e '.[vision]'"
+            ) from exc
+
+        self.close()  # re-open must not leak the previous device handle
+        cap = cv2.VideoCapture(self.device)
+        if not cap.isOpened():
+            cap.release()
+            raise RuntimeError(f"Failed to open USB webcam device {self.device!r}")
+        if self.width is not None:
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+        if self.height is not None:
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        self._cap = cap
+        self._index = 0
 
     def read(self) -> Frame | None:
-        raise NotImplementedError("UsbWebcamFrameSensor.open() must succeed first")
+        if self._cap is None:
+            raise RuntimeError("UsbWebcamFrameSensor.read() called before open()")
+        if self.max_frames is not None and self._index >= self.max_frames:
+            return None
+        ok, frame = self._cap.read()
+        if not ok:
+            return None
+        height, width = frame.shape[0], frame.shape[1]
+        metadata = FrameMetadata(
+            source=self.source,
+            index=self._index,
+            timestamp=datetime.now(UTC).isoformat(),
+            width=width,
+            height=height,
+            format="bgr24",
+        )
+        payload = frame.tobytes()
+        self._index += 1
+        return Frame(metadata=metadata, payload=payload)
 
     def close(self) -> None:
-        return None
+        if self._cap is not None:
+            self._cap.release()
+            self._cap = None
+        self._index = 0
 
     def __enter__(self) -> UsbWebcamFrameSensor:
         self.open()

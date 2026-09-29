@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>siqoq dashboard (read-only)</title>
+<link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+<a class="skip-link" href="#main" data-i18n="skip.link">Skip to main content</a>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-name">siqoq</span>
+    <span class="badge" data-i18n="app.badge">read-only &middot; local</span>
+  </div>
+  <nav class="site-nav" aria-label="Primary" data-i18n-attr="aria-label:nav.aria">
+    <a href="/" aria-current="page" data-i18n="nav.dashboard">Dashboard</a>
+    <a href="/guide" data-i18n="nav.guide">Guide</a>
+  </nav>
+  <div class="host-line" id="host-identity">
+    <span data-i18n="header.hostPrefix"></span><span id="host-identity-value"></span>
+  </div>
+  <div class="controls">
+    <span class="updated" id="updated-at"></span>
+    <label class="auto-refresh" for="auto-refresh-toggle">
+      <input type="checkbox" id="auto-refresh-toggle">
+      <span data-i18n="header.autoRefresh">auto-refresh</span>
+    </label>
+    <select id="auto-refresh-interval" data-i18n-attr="aria-label:header.intervalAria">
+      <option value="15000" data-i18n="header.interval15">15s</option>
+      <option value="30000" data-i18n="header.interval30">30s</option>
+      <option value="60000" data-i18n="header.interval60">60s</option>
+    </select>
+    <button type="button" id="refresh-btn" data-i18n="header.refresh">Refresh</button>
+    <div class="lang-toggle" role="group" data-i18n-attr="aria-label:lang.aria">
+      <button type="button" class="lang-btn" data-lang="en" data-i18n="lang.en">EN</button>
+      <button type="button" class="lang-btn" data-lang="ko" data-i18n="lang.ko">&#54620;&#44397;&#50612;</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section id="kpis" aria-labelledby="kpis-heading">
+    <h2 id="kpis-heading" style="position:absolute;left:-999px;" data-i18n="sec.kpis.title">Summary</h2>
+    <div class="section-sub-row">
+      <p class="section-sub" data-i18n="sec.kpis.subtitle"></p>
+      <button type="button" class="info-toggle" aria-expanded="false" aria-controls="kpis-info" data-i18n-attr="aria-label:common.moreInfoLabel"></button>
+    </div>
+    <div class="info-body" id="kpis-info" hidden><p data-i18n="sec.kpis.more"></p></div>
+    <div class="kpi-strip" id="kpi-strip"></div>
+  </section>
+
+  <section id="fleet" aria-labelledby="fleet-heading">
+    <div class="section-head">
+      <span class="section-title-row">
+        <h2 id="fleet-heading" data-i18n="sec.fleet.title">Fleet</h2>
+        <button type="button" class="info-toggle" aria-expanded="false" aria-controls="fleet-info" data-i18n-attr="aria-label:common.moreInfoLabel"></button>
+      </span>
+      <span class="section-hint" id="fleet-hint"></span>
+    </div>
+    <p class="section-sub" data-i18n="sec.fleet.subtitle"></p>
+    <div class="info-body" id="fleet-info" hidden><p data-i18n="sec.fleet.more"></p></div>
+    <div id="fleet-body"></div>
+  </section>
+
+  <section id="scenarios" aria-labelledby="scenarios-heading">
+    <div class="section-head">
+      <span class="section-title-row">
+        <h2 id="scenarios-heading" data-i18n="sec.scenarios.title">Scenario results</h2>
+        <button type="button" class="info-toggle" aria-expanded="false" aria-controls="scenarios-info" data-i18n-attr="aria-label:common.moreInfoLabel"></button>
+      </span>
+      <span class="section-hint" id="scenarios-hint"></span>
+    </div>
+    <p class="section-sub" data-i18n="sec.scenarios.subtitle"></p>
+    <div class="info-body" id="scenarios-info" hidden><p data-i18n="sec.scenarios.more"></p></div>
+    <div id="scenarios-body"></div>
+  </section>
+
+  <div class="two-col">
+    <section id="observability" aria-labelledby="observability-heading">
+      <div class="section-head">
+        <span class="section-title-row">
+          <h2 id="observability-heading" data-i18n="sec.observability.title">Observability</h2>
+          <button type="button" class="info-toggle" aria-expanded="false" aria-controls="observability-info" data-i18n-attr="aria-label:common.moreInfoLabel"></button>
+        </span>
+      </div>
+      <p class="section-sub" data-i18n="sec.observability.subtitle"></p>
+      <div class="info-body" id="observability-info" hidden><p data-i18n="sec.observability.more"></p></div>
+      <div id="observability-body"></div>
+    </section>
+
+    <section id="host" aria-labelledby="host-heading">
+      <div class="section-head">
+        <span class="section-title-row">
+          <h2 id="host-heading" data-i18n="sec.host.title">This host</h2>
+          <button type="button" class="info-toggle" aria-expanded="false" aria-controls="host-info" data-i18n-attr="aria-label:common.moreInfoLabel"></button>
+        </span>
+      </div>
+      <p class="section-sub" data-i18n="sec.host.subtitle"></p>
+      <div class="info-body" id="host-info" hidden><p data-i18n="sec.host.more"></p></div>
+      <div id="host-body"></div>
+    </section>
+  </div>
+
+  <section id="skills" aria-labelledby="skills-heading">
+    <div class="section-head">
+      <span class="section-title-row">
+        <h2 id="skills-heading" data-i18n="sec.skills.title">Skill catalog</h2>
+        <button type="button" class="info-toggle" aria-expanded="false" aria-controls="skills-info" data-i18n-attr="aria-label:common.moreInfoLabel"></button>
+      </span>
+    </div>
+    <p class="section-sub" data-i18n="sec.skills.subtitle"></p>
+    <div class="info-body" id="skills-info" hidden><p data-i18n="sec.skills.more"></p></div>
+    <div id="skills-body"></div>
+  </section>
+</main>
+
+<footer data-i18n="footer.text">
+  Served from this process's own modules &mdash; nothing here is fabricated. No write
+  endpoints exist; this page cannot change device or fleet state.
+</footer>
+
+<script src="/assets/i18n.js"></script>
+<script src="/assets/app.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var t = SiqoqI18n.t;
+  var relativeTime = SiqoqI18n.relativeTime;
+  var el = SiqoqApp.el;
+  var clear = SiqoqApp.clear;
+  var setBody = SiqoqApp.setBody;
+  var statusBox = SiqoqApp.statusBox;
+  var truncate = SiqoqApp.truncate;
+
+  var CAP_KEYS = [
+    "os_name",
+    "arch",
+    "vision_extra_available",
+    "transport_nats_available",
+    "transport_mqtt_available",
+    "observability_extra_available",
+    "gpu_probe_tool_available"
+  ];
+  var BOOL_CAP_KEYS = CAP_KEYS.filter(function (k) {
+    return k !== "os_name" && k !== "arch";
+  });
+  var AUTOREFRESH_KEY = "siqoq-dashboard-autorefresh";
+
+  var refreshTimer = null;
+  var lastGoodSnapshot = null;
+  var lastFetchedAt = null; // ISO timestamp of the last successful fetch, not render time
+
+  function capChip(key, isOn) {
+    return el("span", { class: "chip " + (isOn ? "on" : "off") }, [
+      el("span", { class: "mark", text: isOn ? "✓" : "–" }),
+      el("span", { text: t("cap." + key) })
+    ]);
+  }
+
+  // ---- Header chrome that isn't tied to a fetched snapshot ----
+
+  function renderHostIdentity(caps) {
+    document.getElementById("host-identity-value").textContent = caps
+      ? caps.os_name + " / " + caps.arch
+      : t("header.hostDetecting");
+  }
+
+  function renderUpdatedAt(fetchedAtIso) {
+    document.getElementById("updated-at").textContent = fetchedAtIso
+      ? t("header.updatedPrefix") + relativeTime(fetchedAtIso).text
+      : t("header.updatedNotLoaded");
+  }
+
+  // ---- Sections ----
+
+  function renderKpis(data) {
+    var strip = document.getElementById("kpi-strip");
+    clear(strip);
+
+    var fleetNodes = "—";
+    if (data.fleet_inventory.configured && data.fleet_inventory.available) {
+      fleetNodes = String(data.fleet_inventory.entries.length);
+    }
+
+    var scenarioRate = "—";
+    if (data.scenario_catalog.configured && data.scenario_catalog.available) {
+      var results = data.scenario_catalog.results;
+      var passed = results.filter(function (r) { return r.passed; }).length;
+      scenarioRate = passed + "/" + results.length;
+    }
+
+    var totalEvents = "—";
+    var alertCount = "—";
+    if (data.fleet_observability.configured && data.fleet_observability.available) {
+      var summary = data.fleet_observability.summary;
+      totalEvents = String(summary.total_events);
+      var outcomes = summary.action_outcome_totals || {};
+      var nonNoop = 0;
+      Object.keys(outcomes).forEach(function (key) {
+        if (key !== "noop") nonNoop += outcomes[key];
+      });
+      alertCount = String(nonNoop);
+    }
+
+    var kpis = [
+      { value: fleetNodes, label: t("kpi.fleetNodes") },
+      { value: scenarioRate, label: t("kpi.scenariosPassing") },
+      { value: totalEvents, label: t("kpi.eventsObserved") },
+      { value: alertCount, label: t("kpi.nonNoopActions") }
+    ];
+    kpis.forEach(function (kpi) {
+      strip.appendChild(el("div", { class: "kpi" }, [
+        el("span", { class: "value", text: kpi.value }),
+        el("span", { class: "label", text: kpi.label })
+      ]));
+    });
+  }
+
+  function renderFleet(data) {
+    var section = data.fleet_inventory;
+    var hint = document.getElementById("fleet-hint");
+    hint.textContent = "";
+
+    if (!section.configured) {
+      hint.textContent = t("fleet.notConfigured");
+      setBody("fleet-body", statusBox(t("fleet.notConfigured"), { hint: "--fleet-inventory PATH" }));
+      return;
+    }
+    if (!section.available) {
+      setBody("fleet-body", statusBox(t("fleet.unavailablePrefix") + section.reason, { error: true }));
+      return;
+    }
+    if (section.entries.length === 0) {
+      setBody("fleet-body", statusBox(t("fleet.emptyConfigured")));
+      return;
+    }
+
+    hint.textContent = t(
+      section.entries.length === 1 ? "fleet.hintCountOne" : "fleet.hintCountMany",
+      { n: section.entries.length }
+    );
+
+    var stalestId = null;
+    var oldestAge = -Infinity;
+    section.entries.forEach(function (entry) {
+      var age = relativeTime(entry.last_seen).ageSec;
+      if (age > oldestAge) { oldestAge = age; stalestId = entry.node_id; }
+    });
+
+    var grid = el("div", { class: "fleet-grid" });
+    section.entries.forEach(function (entry) {
+      var caps = entry.capabilities;
+      var seen = relativeTime(entry.last_seen);
+      var isStalest = entry.node_id === stalestId && section.entries.length > 1;
+
+      var headChildren = [
+        el("div", {}, [
+          el("div", { class: "node-id", text: entry.node_id }),
+          el("div", { class: "node-platform", text: caps.os_name + " / " + caps.arch })
+        ])
+      ];
+      if (isStalest) headChildren.push(el("span", { class: "stale-flag", text: t("fleet.stalest") }));
+
+      var chips = el("div", { class: "chip-row" });
+      BOOL_CAP_KEYS.forEach(function (key) {
+        chips.appendChild(capChip(key, !!caps[key]));
+      });
+
+      var seenLine = el("div", { class: "node-seen", title: seen.title },
+        [document.createTextNode(t("fleet.lastSeenPrefix") + seen.text)]);
+
+      grid.appendChild(el("div", { class: "node-card" + (isStalest ? " is-stalest" : "") }, [
+        el("div", { class: "node-head" }, headChildren),
+        chips,
+        seenLine
+      ]));
+    });
+    setBody("fleet-body", grid);
+  }
+
+  function renderScenarios(data) {
+    var section = data.scenario_catalog;
+    var hint = document.getElementById("scenarios-hint");
+    hint.textContent = "";
+
+    if (!section.configured) {
+      hint.textContent = t("scenarios.notConfigured");
+      setBody("scenarios-body", statusBox(t("scenarios.notConfigured"), { hint: "--scenario-catalog PATH" }));
+      return;
+    }
+    if (!section.available) {
+      setBody("scenarios-body", statusBox(t("scenarios.unavailablePrefix") + section.reason, { error: true }));
+      return;
+    }
+    if (section.results.length === 0) {
+      setBody("scenarios-body", statusBox(t("scenarios.emptyConfigured")));
+      return;
+    }
+
+    var passed = section.results.filter(function (r) { return r.passed; }).length;
+    hint.textContent = t("scenarios.hintPassing", { passed: passed, total: section.results.length });
+
+    var sorted = section.results.slice().sort(function (a, b) {
+      if (a.passed === b.passed) return 0;
+      return a.passed ? 1 : -1;
+    });
+
+    var list = el("div", { class: "scenario-list" });
+    sorted.forEach(function (result) {
+      var detailWrap = el("details", { class: "scenario-detail" }, [
+        el("summary", {}, [
+          document.createTextNode(t("scenario.observedPrefix")),
+          el("span", { class: "preview", text: truncate(result.detail, 90) })
+        ]),
+        el("div", { class: "full", text: result.detail })
+      ]);
+      list.appendChild(el("div", { class: "scenario-row " + (result.passed ? "is-pass" : "is-fail") }, [
+        el("span", {
+          class: "pill " + (result.passed ? "pass" : "fail"),
+          text: t(result.passed ? "scenario.pillPass" : "scenario.pillFail")
+        }),
+        el("span", { class: "scenario-id", text: result.entry_id }),
+        detailWrap
+      ]));
+    });
+    setBody("scenarios-body", list);
+  }
+
+  function barPanel(title, totals) {
+    var entries = Object.keys(totals).map(function (key) { return [key, totals[key]]; });
+    entries.sort(function (a, b) { return b[1] - a[1]; });
+    var max = entries.reduce(function (m, e) { return Math.max(m, e[1]); }, 0) || 1;
+
+    var list = el("ul", { class: "bar-list" });
+    if (entries.length === 0) {
+      list.appendChild(el("li", { class: "status", text: t("obs.noData") }));
+    }
+    entries.forEach(function (entry) {
+      var fill = el("div", { class: "bar-fill", style: "width:" + Math.round((entry[1] / max) * 100) + "%" });
+      list.appendChild(el("li", { class: "bar-row" }, [
+        el("span", { class: "bar-name", text: entry[0] }),
+        el("span", { class: "bar-track" }, [fill]),
+        el("span", { class: "bar-count", text: String(entry[1]) })
+      ]));
+    });
+    return el("div", { class: "obs-panel" }, [
+      el("h3", { text: title }),
+      list
+    ]);
+  }
+
+  function renderObservability(data) {
+    var section = data.fleet_observability;
+    if (!section.configured) {
+      setBody("observability-body", statusBox(t("obs.notConfigured"), { hint: "--fleet-results-dir PATH" }));
+      return;
+    }
+    if (!section.available) {
+      setBody("observability-body", statusBox(t("obs.unavailablePrefix") + section.reason, { error: true }));
+      return;
+    }
+    var summary = section.summary;
+    if (summary.node_count === 0) {
+      setBody("observability-body", statusBox(t("obs.emptyConfigured")));
+      return;
+    }
+
+    var wrap = el("div", { class: "obs-grid" }, [
+      barPanel(t("obs.eventTypesTitle", { total: summary.total_events }), summary.event_type_totals),
+      barPanel(t("obs.actionOutcomesTitle"), summary.action_outcome_totals)
+    ]);
+    setBody("observability-body", wrap);
+  }
+
+  function renderHost(data) {
+    var caps = data.capabilities;
+    var list = el("ul", { class: "check-list" });
+    BOOL_CAP_KEYS.forEach(function (key) {
+      list.appendChild(el("li", { class: "check-row" }, [capChip(key, !!caps[key])]));
+    });
+    var platform = el("p", { class: "section-hint", style: "margin:-0.4rem 0 0.75rem;" },
+      [document.createTextNode(caps.os_name + " / " + caps.arch)]);
+    var wrap = el("div", {}, [platform, list]);
+    setBody("host-body", wrap);
+    renderHostIdentity(caps);
+  }
+
+  function renderSkills(data) {
+    var skills = data.skills;
+    if (skills.length === 0) {
+      setBody("skills-body", statusBox(t("skills.empty")));
+      return;
+    }
+    var list = el("ul", { class: "skill-list" });
+    skills.forEach(function (skill) {
+      var tags = el("div", { class: "tag-row" });
+      skill.event_types.forEach(function (type) {
+        tags.appendChild(el("span", { class: "tag", text: type }));
+      });
+      list.appendChild(el("li", { class: "skill-item" }, [
+        el("div", { class: "skill-name", text: skill.name }),
+        el("div", { class: "skill-desc", text: skill.description }),
+        tags
+      ]));
+    });
+    setBody("skills-body", list);
+  }
+
+  function renderAll(data) {
+    lastGoodSnapshot = data;
+    renderKpis(data);
+    renderFleet(data);
+    renderScenarios(data);
+    renderObservability(data);
+    renderHost(data);
+    renderSkills(data);
+    renderUpdatedAt(lastFetchedAt);
+  }
+
+  function renderError(err) {
+    var msg = t("common.errorFetchPrefix") + err;
+    ["fleet-body", "scenarios-body", "observability-body", "host-body", "skills-body"].forEach(function (id) {
+      setBody(id, statusBox(msg, { error: true, retry: load }));
+    });
+  }
+
+  // Manual refresh and the auto-refresh timer can overlap; only the latest
+  // request may render, so a slow older response never overwrites newer data.
+  var latestRequest = 0;
+
+  function load() {
+    var requestId = ++latestRequest;
+    fetch("/api/snapshot")
+      .then(function (response) {
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        return response.json();
+      })
+      .then(function (data) {
+        if (requestId === latestRequest) {
+          lastFetchedAt = new Date().toISOString();
+          renderAll(data);
+        }
+      })
+      .catch(function (err) {
+        if (requestId === latestRequest) renderError(err);
+      });
+  }
+
+  // ---- Controls ----
+
+  function readAutoRefreshPref() {
+    try {
+      var raw = localStorage.getItem(AUTOREFRESH_KEY);
+      return raw ? JSON.parse(raw) : { enabled: false, interval: 15000 };
+    } catch (e) {
+      return { enabled: false, interval: 15000 };
+    }
+  }
+
+  function writeAutoRefreshPref(pref) {
+    try {
+      localStorage.setItem(AUTOREFRESH_KEY, JSON.stringify(pref));
+    } catch (e) {
+      // ignore (private browsing / storage disabled)
+    }
+  }
+
+  function applyAutoRefresh() {
+    var toggle = document.getElementById("auto-refresh-toggle");
+    var intervalSelect = document.getElementById("auto-refresh-interval");
+    if (refreshTimer) {
+      clearInterval(refreshTimer);
+      refreshTimer = null;
+    }
+    if (toggle.checked) {
+      refreshTimer = setInterval(load, parseInt(intervalSelect.value, 10));
+    }
+    writeAutoRefreshPref({ enabled: toggle.checked, interval: parseInt(intervalSelect.value, 10) });
+  }
+
+  document.getElementById("refresh-btn").addEventListener("click", load);
+  document.getElementById("auto-refresh-toggle").addEventListener("change", applyAutoRefresh);
+  document.getElementById("auto-refresh-interval").addEventListener("change", applyAutoRefresh);
+
+  document.addEventListener("siqoq:lang-changed", function () {
+    if (lastGoodSnapshot) {
+      renderAll(lastGoodSnapshot);
+    } else {
+      renderHostIdentity(null);
+      renderUpdatedAt(null);
+    }
+  });
+
+  renderHostIdentity(null);
+  renderUpdatedAt(null);
+
+  var pref = readAutoRefreshPref();
+  document.getElementById("auto-refresh-toggle").checked = !!pref.enabled;
+  document.getElementById("auto-refresh-interval").value = String(pref.interval || 15000);
+  applyAutoRefresh();
+
+  load();
+})();
+</script>
+</body>
+</html>

@@ -63,7 +63,9 @@ FrameSensor (frame-level)  --InferenceAdapter-->  SemanticEvent  <--yielded by--
 code should depend on. `FrameSensor` exists because some sources (recorded
 video, webcams) naturally produce frames, not pre-classified events; keeping
 it separate lets inference remain swappable (mock vs. ONNX/OpenCV) without
-touching the event-level contract.
+touching the event-level contract. `UsbWebcamFrameSensor` is a real
+OpenCV-backed capture implementation gated behind the optional `vision`
+extra; `MockWebcamFrameSensor` remains the hardware-free stand-in for CI.
 
 ## Compatibility rules
 

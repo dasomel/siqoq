@@ -14,7 +14,8 @@
 `docs/architecture.md`의 배포 모드 표(Laptop / Simulation / Edge / Fleet)는
 이미 각 모드가 서로 다른 센서/추론/전송/액션 어댑터의 부분집합을
 지원함을 암시하고 있습니다. 기능 선언이 있으면 호출자가 시행착오로
-탐색하는 대신(예: `UsbWebcamFrameSensor`의 `NotImplementedError`를 잡는
+탐색하는 대신(예: `vision` 익스트라나 실제 카메라를 사용할 수 없을 때
+`UsbWebcamFrameSensor`가 발생시키는 `ImportError`/`RuntimeError`를 잡는
 방식) 런타임이 이를 명시적으로 선언할 수 있습니다.
 
 ## 스케치 (예시, 구현되지 않음)

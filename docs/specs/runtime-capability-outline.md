@@ -14,7 +14,8 @@ without a follow-up issue — see AGENTS.md's "smallest coherent change" and
 / Fleet) already implies each mode supports a different subset of
 sensor/inference/transport/action adapters. A capability declaration would
 let a runtime state this explicitly instead of callers probing by trial and
-error (e.g. catching `NotImplementedError` from `UsbWebcamFrameSensor`).
+error (e.g. catching the `ImportError`/`RuntimeError` `UsbWebcamFrameSensor`
+raises when the `vision` extra or a physical camera isn't available).
 
 ## Sketch (illustrative, not implemented)
 
