@@ -63,7 +63,10 @@ FrameSensor (프레임 레벨)  --InferenceAdapter-->  SemanticEvent  <--반환-
 계약입니다. `FrameSensor`가 별도로 존재하는 이유는 일부 소스(녹화 영상,
 웹캠)가 미리 분류된 이벤트가 아니라 프레임을 자연스럽게 생성하기 때문이며,
 분리해 둠으로써 추론 백엔드(mock vs. ONNX/OpenCV)를 이벤트 레벨 계약을
-건드리지 않고 교체할 수 있습니다.
+건드리지 않고 교체할 수 있습니다. `UsbWebcamFrameSensor`는 선택적 `vision`
+익스트라를 통해 활성화되는 실제 OpenCV 기반 캡처 구현이며,
+`MockWebcamFrameSensor`는 CI를 위한 하드웨어 없는 대체 구현으로 남아
+있습니다.
 
 ## 호환성 규칙
 
