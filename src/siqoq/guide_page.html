@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>siqoq guide (how it works)</title>
+<link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+<a class="skip-link" href="#main" data-i18n="skip.link">Skip to main content</a>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-name">siqoq</span>
+    <span class="badge" data-i18n="app.badge">read-only &middot; local</span>
+  </div>
+  <nav class="site-nav" aria-label="Primary" data-i18n-attr="aria-label:nav.aria">
+    <a href="/" data-i18n="nav.dashboard">Dashboard</a>
+    <a href="/guide" aria-current="page" data-i18n="nav.guide">Guide</a>
+  </nav>
+  <div class="controls" style="margin-left:auto;">
+    <div class="lang-toggle" role="group" data-i18n-attr="aria-label:lang.aria">
+      <button type="button" class="lang-btn" data-lang="en" data-i18n="lang.en">EN</button>
+      <button type="button" class="lang-btn" data-lang="ko" data-i18n="lang.ko">&#54620;&#44397;&#50612;</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="guide-main">
+  <h1 data-i18n="guide.title">How it works</h1>
+  <p class="guide-lede" data-i18n="guide.subtitle"></p>
+  <p class="guide-lede" data-i18n="guide.intro"></p>
+
+  <div class="status-legend" aria-hidden="false">
+    <span class="chip implemented"><span class="mark">&#10003;</span><span data-i18n="guide.status.implemented"></span></span>
+    <span class="chip stub"><span class="mark">&#9651;</span><span data-i18n="guide.status.stub"></span></span>
+    <span class="chip proposed"><span class="mark">&#8213;</span><span data-i18n="guide.status.proposed"></span></span>
+  </div>
+
+  <section class="guide-section" aria-labelledby="loop-heading">
+    <h2 id="loop-heading" data-i18n="guide.loop.title">Core loop</h2>
+    <p class="section-sub" data-i18n="guide.loop.desc"></p>
+
+    <div class="diagram-wrap">
+      <!-- Wide layout: 2-row snake, shown >=40rem (see app.css .loop-svg-wide) -->
+      <svg class="loop-svg-wide" viewBox="0 0 1005 315" role="img" aria-labelledby="loop-diagram-title">
+        <title id="loop-diagram-title" data-i18n="guide.loop.diagramTitle">Diagram: sensor to action core loop</title>
+        <defs>
+          <marker id="loop-arrow-wide" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--fg-muted)"></path>
+          </marker>
+        </defs>
+        <rect x="5" y="5" width="995" height="272" rx="6" fill="none" stroke="var(--fg-muted)" stroke-width="1" stroke-dasharray="4 4"></rect>
+        <g font-family="var(--sans)">
+          <!-- row 1: stages 1-4 left to right -->
+          <rect x="20" y="25" width="220" height="80" rx="3" fill="var(--bg)" stroke="var(--line)"></rect>
+          <text x="32" y="41" class="mono" font-size="9" fill="var(--fg-muted)">01</text>
+          <text x="130" y="52" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.sensor.label">Sensor adapter</text>
+          <text x="130" y="70" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" data-i18n="guide.loop.sensor.desc">simulated / recorded / physical</text>
+
+          <rect x="267" y="25" width="220" height="80" rx="3" fill="var(--bg)" stroke="var(--line)"></rect>
+          <text x="279" y="41" class="mono" font-size="9" fill="var(--fg-muted)">02</text>
+          <text x="377" y="52" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.inference.label">Inference</text>
+          <text x="377" y="70" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" data-i18n="guide.loop.inference.desc">frame &#8594; detection</text>
+
+          <rect x="514" y="25" width="220" height="80" rx="3" fill="var(--teal-soft)" stroke="var(--teal)"></rect>
+          <text x="526" y="41" class="mono" font-size="9" fill="var(--teal)">03</text>
+          <text x="624" y="52" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.event.label">Semantic event</text>
+          <text x="624" y="70" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" data-i18n="guide.loop.event.desc">SemanticEvent contract</text>
+
+          <rect x="761" y="25" width="220" height="80" rx="3" fill="var(--bg)" stroke="var(--line)"></rect>
+          <text x="773" y="41" class="mono" font-size="9" fill="var(--fg-muted)">04</text>
+          <text x="871" y="52" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.transport.label">Transport</text>
+          <text x="871" y="70" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" data-i18n="guide.loop.transport.desc">in-process / NATS / MQTT</text>
+
+          <!-- row 1 arrows -->
+          <line x1="240" y1="65" x2="267" y2="65" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#loop-arrow-wide)"></line>
+          <line x1="487" y1="65" x2="514" y2="65" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#loop-arrow-wide)"></line>
+          <line x1="734" y1="65" x2="761" y2="65" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#loop-arrow-wide)"></line>
+
+          <!-- drop from stage 4 to stage 5, same column -->
+          <line x1="871" y1="105" x2="871" y2="170" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#loop-arrow-wide)"></line>
+
+          <!-- row 2: stages 5-7, right to left -->
+          <rect x="761" y="170" width="220" height="80" rx="3" fill="var(--bg)" stroke="var(--line)"></rect>
+          <text x="773" y="186" class="mono" font-size="9" fill="var(--fg-muted)">05</text>
+          <text x="871" y="197" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.policy.label">Policy decide</text>
+          <text x="871" y="215" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" data-i18n="guide.loop.policy.desc">MockAction contract</text>
+
+          <rect x="514" y="170" width="220" height="80" rx="3" fill="var(--amber-soft)" stroke="var(--amber)"></rect>
+          <text x="526" y="186" class="mono" font-size="9" fill="var(--amber)">06</text>
+          <text x="624" y="197" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.safety.label">Safety gate</text>
+          <text x="624" y="215" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" data-i18n="guide.loop.safety.desc">SafetyGate.approve()</text>
+
+          <rect x="267" y="170" width="220" height="80" rx="3" fill="var(--bg)" stroke="var(--line)"></rect>
+          <text x="279" y="186" class="mono" font-size="9" fill="var(--fg-muted)">07</text>
+          <text x="377" y="197" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.action.label">Action adapter</text>
+          <text x="377" y="215" text-anchor="middle" font-size="9.5" fill="var(--fg-muted)" data-i18n="guide.loop.action.desc">executes / rejects / no-ops</text>
+
+          <!-- row 2 arrows (leftward) -->
+          <line x1="761" y1="210" x2="734" y2="210" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#loop-arrow-wide)"></line>
+          <line x1="514" y1="210" x2="487" y2="210" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#loop-arrow-wide)"></line>
+
+          <text x="502" y="266" text-anchor="middle" font-size="11" fill="var(--fg-muted)" data-i18n="guide.loop.observability.label">Observability / decision trace</text>
+        </g>
+      </svg>
+
+      <!-- Narrow layout: vertical stack, shown below 40rem -->
+      <svg class="loop-svg-mobile" viewBox="0 0 460 800" role="img" aria-labelledby="loop-diagram-title-mobile">
+        <title id="loop-diagram-title-mobile" data-i18n="guide.loop.diagramTitle">Diagram: sensor to action core loop</title>
+        <defs>
+          <marker id="loop-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--fg-muted)"></path>
+          </marker>
+        </defs>
+
+        <!-- stage boxes: y = 20 + i*110, height 64 -->
+        <g font-family="var(--sans)">
+          <!-- 1 Sensor adapter -->
+          <rect x="20" y="20" width="260" height="64" rx="3" fill="var(--bg)" stroke="var(--line)"></rect>
+          <text x="34" y="38" class="mono" font-size="10" fill="var(--fg-muted)">01</text>
+          <text x="150" y="50" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.sensor.label">Sensor adapter</text>
+          <text x="150" y="70" text-anchor="middle" font-size="10" fill="var(--fg-muted)" data-i18n="guide.loop.sensor.desc">simulated / recorded / physical</text>
+
+          <line x1="150" y1="84" x2="150" y2="128" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#loop-arrow)"></line>
+
+          <!-- 2 Inference -->
+          <rect x="20" y="130" width="260" height="64" rx="3" fill="var(--bg)" stroke="var(--line)"></rect>
+          <text x="34" y="148" class="mono" font-size="10" fill="var(--fg-muted)">02</text>
+          <text x="150" y="160" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.inference.label">Inference</text>
+          <text x="150" y="180" text-anchor="middle" font-size="10" fill="var(--fg-muted)" data-i18n="guide.loop.inference.desc">frame &#8594; detection</text>
+
+          <line x1="150" y1="194" x2="150" y2="238" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#loop-arrow)"></line>
+
+          <!-- 3 Semantic event -->
+          <rect x="20" y="240" width="260" height="64" rx="3" fill="var(--teal-soft)" stroke="var(--teal)"></rect>
+          <text x="34" y="258" class="mono" font-size="10" fill="var(--teal)">03</text>
+          <text x="150" y="270" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.event.label">Semantic event</text>
+          <text x="150" y="290" text-anchor="middle" font-size="10" fill="var(--fg-muted)" data-i18n="guide.loop.event.desc">SemanticEvent contract</text>
+
+          <line x1="150" y1="304" x2="150" y2="348" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#loop-arrow)"></line>
+
+          <!-- 4 Transport -->
+          <rect x="20" y="350" width="260" height="64" rx="3" fill="var(--bg)" stroke="var(--line)"></rect>
+          <text x="34" y="368" class="mono" font-size="10" fill="var(--fg-muted)">04</text>
+          <text x="150" y="380" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.transport.label">Transport</text>
+          <text x="150" y="400" text-anchor="middle" font-size="10" fill="var(--fg-muted)" data-i18n="guide.loop.transport.desc">in-process / NATS / MQTT</text>
+
+          <line x1="150" y1="414" x2="150" y2="458" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#loop-arrow)"></line>
+
+          <!-- 5 Policy decide -->
+          <rect x="20" y="460" width="260" height="64" rx="3" fill="var(--bg)" stroke="var(--line)"></rect>
+          <text x="34" y="478" class="mono" font-size="10" fill="var(--fg-muted)">05</text>
+          <text x="150" y="490" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.policy.label">Policy decide</text>
+          <text x="150" y="510" text-anchor="middle" font-size="10" fill="var(--fg-muted)" data-i18n="guide.loop.policy.desc">MockAction contract</text>
+
+          <line x1="150" y1="524" x2="150" y2="568" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#loop-arrow)"></line>
+
+          <!-- 6 Safety gate -->
+          <rect x="20" y="570" width="260" height="64" rx="3" fill="var(--amber-soft)" stroke="var(--amber)"></rect>
+          <text x="34" y="588" class="mono" font-size="10" fill="var(--amber)">06</text>
+          <text x="150" y="600" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.safety.label">Safety gate</text>
+          <text x="150" y="620" text-anchor="middle" font-size="10" fill="var(--fg-muted)" data-i18n="guide.loop.safety.desc">SafetyGate.approve()</text>
+
+          <line x1="150" y1="634" x2="150" y2="678" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#loop-arrow)"></line>
+
+          <!-- 7 Action adapter -->
+          <rect x="20" y="680" width="260" height="64" rx="3" fill="var(--bg)" stroke="var(--line)"></rect>
+          <text x="34" y="698" class="mono" font-size="10" fill="var(--fg-muted)">07</text>
+          <text x="150" y="710" text-anchor="middle" font-size="13" font-weight="600" fill="var(--fg)" data-i18n="guide.loop.action.label">Action adapter</text>
+          <text x="150" y="730" text-anchor="middle" font-size="10" fill="var(--fg-muted)" data-i18n="guide.loop.action.desc">executes / rejects / no-ops</text>
+
+          <!-- observability bracket spanning every stage -->
+          <line x1="280" y1="52" x2="400" y2="52" stroke="var(--fg-muted)" stroke-width="1" stroke-dasharray="3 3"></line>
+          <line x1="280" y1="162" x2="400" y2="162" stroke="var(--fg-muted)" stroke-width="1" stroke-dasharray="3 3"></line>
+          <line x1="280" y1="272" x2="400" y2="272" stroke="var(--fg-muted)" stroke-width="1" stroke-dasharray="3 3"></line>
+          <line x1="280" y1="382" x2="400" y2="382" stroke="var(--fg-muted)" stroke-width="1" stroke-dasharray="3 3"></line>
+          <line x1="280" y1="492" x2="400" y2="492" stroke="var(--fg-muted)" stroke-width="1" stroke-dasharray="3 3"></line>
+          <line x1="280" y1="602" x2="400" y2="602" stroke="var(--fg-muted)" stroke-width="1" stroke-dasharray="3 3"></line>
+          <line x1="280" y1="712" x2="400" y2="712" stroke="var(--fg-muted)" stroke-width="1" stroke-dasharray="3 3"></line>
+          <line x1="400" y1="52" x2="400" y2="712" stroke="var(--fg-muted)" stroke-width="1.5" stroke-dasharray="5 4"></line>
+          <text x="422" y="382" text-anchor="middle" font-size="10" fill="var(--fg-muted)" transform="rotate(-90 422 382)" data-i18n="guide.loop.observability.label">Observability / decision trace</text>
+        </g>
+      </svg>
+    </div>
+
+    <h3 data-i18n="guide.status.title">Reading the diagrams</h3>
+    <ul>
+      <li data-i18n="guide.loop.sensorNote"></li>
+      <li data-i18n="guide.loop.inferenceNote"></li>
+      <li data-i18n="guide.loop.eventNote"></li>
+      <li data-i18n="guide.loop.transportNote"></li>
+      <li data-i18n="guide.loop.policyNote"></li>
+      <li data-i18n="guide.loop.actionNote"></li>
+    </ul>
+    <p class="cite">
+      <span data-i18n="guide.sourcePrefix"></span>src/siqoq/{sensors,video_sensors,inference,events,transport,policy,actuation,gpio}.py
+    </p>
+  </section>
+
+  <section class="guide-section" aria-labelledby="modes-heading">
+    <h2 id="modes-heading" data-i18n="guide.modes.title">Deployment modes</h2>
+    <p class="section-sub" data-i18n="guide.modes.desc"></p>
+
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 700 96" role="img" aria-labelledby="modes-diagram-title">
+        <title id="modes-diagram-title" data-i18n="guide.modes.diagramTitle">Diagram: laptop, simulation, edge and fleet deployment modes</title>
+        <defs>
+          <marker id="modes-arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--fg-muted)"></path>
+          </marker>
+        </defs>
+        <g font-family="var(--sans)">
+          <rect x="10" y="16" width="140" height="64" rx="3" fill="var(--teal-soft)" stroke="var(--teal)"></rect>
+          <text x="80" y="54" text-anchor="middle" font-size="14" font-weight="600" fill="var(--fg)" data-i18n="guide.modes.laptop">Laptop</text>
+
+          <line x1="150" y1="48" x2="192" y2="48" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#modes-arrow)"></line>
+
+          <rect x="194" y="16" width="140" height="64" rx="3" fill="var(--bg-raised)" stroke="var(--line)" stroke-dasharray="4 3"></rect>
+          <text x="264" y="54" text-anchor="middle" font-size="14" font-weight="600" fill="var(--fg)" data-i18n="guide.modes.simulation">Simulation</text>
+
+          <line x1="334" y1="48" x2="376" y2="48" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#modes-arrow)"></line>
+
+          <rect x="378" y="16" width="140" height="64" rx="3" fill="var(--amber-soft)" stroke="var(--amber)"></rect>
+          <text x="448" y="54" text-anchor="middle" font-size="14" font-weight="600" fill="var(--fg)" data-i18n="guide.modes.edge">Edge</text>
+
+          <line x1="518" y1="48" x2="560" y2="48" stroke="var(--fg-muted)" stroke-width="1.5" marker-end="url(#modes-arrow)"></line>
+
+          <rect x="562" y="16" width="128" height="64" rx="3" fill="var(--bg-raised)" stroke="var(--line)" stroke-dasharray="4 3"></rect>
+          <text x="626" y="54" text-anchor="middle" font-size="14" font-weight="600" fill="var(--fg)" data-i18n="guide.modes.fleet">Fleet</text>
+        </g>
+      </svg>
+    </div>
+
+    <table class="data-table">
+      <colgroup>
+        <col style="width:11%">
+        <col style="width:15%">
+        <col style="width:15%">
+        <col style="width:14%">
+        <col style="width:13%">
+        <col style="width:32%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th data-i18n="guide.modes.col.mode">Mode</th>
+          <th data-i18n="guide.modes.col.input">Input</th>
+          <th data-i18n="guide.modes.col.runtime">Runtime</th>
+          <th data-i18n="guide.modes.col.transport">Transport</th>
+          <th data-i18n="guide.modes.col.output">Output</th>
+          <th data-i18n="guide.modes.col.status">Status here</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-i18n="guide.modes.laptop" data-i18n-attr="data-label:guide.modes.col.mode">Laptop</td>
+          <td data-i18n="guide.modes.laptop.input" data-i18n-attr="data-label:guide.modes.col.input"></td>
+          <td data-i18n="guide.modes.laptop.runtime" data-i18n-attr="data-label:guide.modes.col.runtime"></td>
+          <td data-i18n="guide.modes.laptop.transport" data-i18n-attr="data-label:guide.modes.col.transport"></td>
+          <td data-i18n="guide.modes.laptop.output" data-i18n-attr="data-label:guide.modes.col.output"></td>
+          <td class="mode-status" data-i18n="guide.modes.laptop.status" data-i18n-attr="data-label:guide.modes.col.status"></td>
+        </tr>
+        <tr>
+          <td data-i18n="guide.modes.simulation" data-i18n-attr="data-label:guide.modes.col.mode">Simulation</td>
+          <td data-i18n="guide.modes.simulation.input" data-i18n-attr="data-label:guide.modes.col.input"></td>
+          <td data-i18n="guide.modes.simulation.runtime" data-i18n-attr="data-label:guide.modes.col.runtime"></td>
+          <td data-i18n="guide.modes.simulation.transport" data-i18n-attr="data-label:guide.modes.col.transport"></td>
+          <td data-i18n="guide.modes.simulation.output" data-i18n-attr="data-label:guide.modes.col.output"></td>
+          <td class="mode-status" data-i18n="guide.modes.simulation.status" data-i18n-attr="data-label:guide.modes.col.status"></td>
+        </tr>
+        <tr>
+          <td data-i18n="guide.modes.edge" data-i18n-attr="data-label:guide.modes.col.mode">Edge</td>
+          <td data-i18n="guide.modes.edge.input" data-i18n-attr="data-label:guide.modes.col.input"></td>
+          <td data-i18n="guide.modes.edge.runtime" data-i18n-attr="data-label:guide.modes.col.runtime"></td>
+          <td data-i18n="guide.modes.edge.transport" data-i18n-attr="data-label:guide.modes.col.transport"></td>
+          <td data-i18n="guide.modes.edge.output" data-i18n-attr="data-label:guide.modes.col.output"></td>
+          <td class="mode-status" data-i18n="guide.modes.edge.status" data-i18n-attr="data-label:guide.modes.col.status"></td>
+        </tr>
+        <tr>
+          <td data-i18n="guide.modes.fleet" data-i18n-attr="data-label:guide.modes.col.mode">Fleet</td>
+          <td data-i18n="guide.modes.fleet.input" data-i18n-attr="data-label:guide.modes.col.input"></td>
+          <td data-i18n="guide.modes.fleet.runtime" data-i18n-attr="data-label:guide.modes.col.runtime"></td>
+          <td data-i18n="guide.modes.fleet.transport" data-i18n-attr="data-label:guide.modes.col.transport"></td>
+          <td data-i18n="guide.modes.fleet.output" data-i18n-attr="data-label:guide.modes.col.output"></td>
+          <td class="mode-status" data-i18n="guide.modes.fleet.status" data-i18n-attr="data-label:guide.modes.col.status"></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="cite"><span data-i18n="guide.sourcePrefix"></span>docs/architecture.md (Deployment modes)</p>
+  </section>
+
+  <section class="guide-section" aria-labelledby="mapping-heading">
+    <h2 id="mapping-heading" data-i18n="guide.mapping.title">How the dashboard maps to this flow</h2>
+    <p class="section-sub" data-i18n="guide.mapping.desc"></p>
+    <ul class="mapping-list">
+      <li class="mapping-row">
+        <span class="mapping-term" data-i18n="guide.mapping.fleet.term">Fleet section</span>
+        <span class="mapping-desc" data-i18n="guide.mapping.fleet.desc"></span>
+      </li>
+      <li class="mapping-row">
+        <span class="mapping-term" data-i18n="guide.mapping.scenarios.term">Scenario results</span>
+        <span class="mapping-desc" data-i18n="guide.mapping.scenarios.desc"></span>
+      </li>
+      <li class="mapping-row">
+        <span class="mapping-term" data-i18n="guide.mapping.observability.term">Observability panel</span>
+        <span class="mapping-desc" data-i18n="guide.mapping.observability.desc"></span>
+      </li>
+      <li class="mapping-row">
+        <span class="mapping-term" data-i18n="guide.mapping.host.term">This host / capabilities</span>
+        <span class="mapping-desc" data-i18n="guide.mapping.host.desc"></span>
+      </li>
+      <li class="mapping-row">
+        <span class="mapping-term" data-i18n="guide.mapping.skills.term">Skill catalog</span>
+        <span class="mapping-desc" data-i18n="guide.mapping.skills.desc"></span>
+      </li>
+    </ul>
+    <p class="cite"><span data-i18n="guide.sourcePrefix"></span>src/siqoq/ui.py (build_snapshot)</p>
+  </section>
+
+  <section class="guide-section" aria-labelledby="notes-heading">
+    <h2 id="notes-heading" data-i18n="guide.notes.title">Notes and open items</h2>
+    <ul>
+      <li data-i18n="guide.notes.actuation"></li>
+      <li data-i18n="guide.notes.sandbox"></li>
+    </ul>
+  </section>
+</main>
+
+<footer data-i18n="footer.text">
+  Served from this process's own modules &mdash; nothing here is fabricated. No write
+  endpoints exist; this page cannot change device or fleet state.
+</footer>
+
+<script src="/assets/i18n.js"></script>
+<script src="/assets/app.js"></script>
+</body>
+</html>
