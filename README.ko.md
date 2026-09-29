@@ -66,18 +66,18 @@ Simulation / Recorded Data
 
 아키텍처를 문서로만 두지 않기 위해 외부 하드웨어나 추가 라이브러리가 없어도 실행되는 최소 골격을 구현했습니다.
 
-- vendor-neutral `SensorSample`, `Detection`, `ActionRequest`, `ActionResult` contract
-- `SensorAdapter`, `InferenceAdapter`, `EventTransport`, `Policy`, `SafetyGate`, `ActionAdapter` protocol
-- generated sensor + deterministic static inference
+- vendor-neutral `SensorSample`, `Detection`, `ActionResult` contract
+- `SensorAdapter`, `InferenceAdapter`, `EventPublisher`, `ActuatorAdapter` protocol
+- generated/fixture sensor + mock inference
 - versioned semantic event envelope
-- in-memory event transport
-- perception → event → policy → safety → action pipeline
-- safe-by-default `NoOpPolicy` 및 allow-list safety gate
-- 실제 장비를 건드리지 않는 mock action adapter
-- runtime manifest + 기본 capability discovery
-- `siqoq demo` hardware-free pipeline demo
-- `siqoq inspect` runtime/capability inspection
-- pipeline, safety boundary, runtime 자동화 테스트
+- in-memory/stdout/file event transport (NATS/MQTT는 optional)
+- perception → event → policy → safety → action scenario pipeline
+- deterministic `decide()` 정책 및 `SafetyGate`
+- 실제 장비를 건드리지 않는 mock actuator adapter
+- 기본 capability discovery (`siqoq capabilities`)
+- `siqoq demo` hardware-free demo 및 `siqoq scenario run`
+- 로컬 read-only web dashboard (`siqoq ui`)
+- contract, scenario, safety boundary 자동화 테스트
 
 현재 구현은 public API를 확정한 것이 아니라 실제 adapter와 runtime을 붙이기 위한 **contract-first skeleton**입니다.
 

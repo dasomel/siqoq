@@ -11,17 +11,17 @@
 - [Architecture](architecture.md)
 - [Roadmap](roadmap.md)
 - [Development guide](development.md)
-- [Deterministic scenarios](scenarios.md)
+- [Scenario and benchmark catalog](specs/scenario-catalog.md)
+- [Testing](testing.md)
 - [Project principles](principles.md)
 
 ## Specifications
 
 - [Contract specification roadmap](specs/README.md)
-- Sensor Contract — planned
-- Semantic Event Contract — planned
-- Action Contract — planned
-- Runtime Manifest — planned
-- Capability Contract — planned
+- [Sensor Contract](specs/sensor-contract.md)
+- [Semantic Event Contract](specs/semantic-event-contract.md)
+- [Action Contract](specs/action-contract.md)
+- [Runtime/Capability Contract outline](specs/runtime-capability-outline.md)
 
 ## Documentation policy
 

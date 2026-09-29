@@ -19,29 +19,29 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev]'
 siqoq demo
-siqoq inspect
+siqoq capabilities
 ```
 
-`siqoq demo`는 generated sensor → static inference → semantic event → no-op policy → mock-safe action path를 실행합니다. 카메라나 accelerator가 필요하지 않습니다.
+`siqoq demo`는 hardware-free semantic-event demo를 실행합니다. 카메라나 accelerator가 필요하지 않습니다.
 
-`siqoq inspect`는 vendor SDK 없이 현재 runtime manifest와 기본 host capability를 출력합니다.
+`siqoq capabilities`는 vendor SDK 없이 best-effort runtime capability를 JSON으로 출력합니다.
 
 ## 현재 스켈레톤 경계
 
 ```text
-GeneratedSensor
+GeneratedSensorAdapter
       ↓
-StaticInference
+MockInferenceAdapter
       ↓
 SemanticEvent
       ↓
-MemoryTransport
+InMemoryTransport
       ↓
-NoOpPolicy
+decide() (deterministic policy)
       ↓
-AllowListSafetyGate
+SafetyGate
       ↓
-MockActionAdapter
+MockActuatorAdapter
 ```
 
 이 구조는 최종 구현을 미리 확정한 것이 아니라 recorded video, webcam, ONNX Runtime, NATS/MQTT, simulator, Jetson/TensorRT, physical action adapter를 순차적으로 붙이기 위한 실행 가능한 seam입니다.
@@ -63,19 +63,12 @@ ruff check .
 pytest
 python -m build
 siqoq demo
-siqoq inspect
 ```
 
 ## 저장소 구조
 
 ```text
-src/siqoq/
-  contracts.py      vendor-neutral data/protocol contract
-  events.py         semantic-event envelope
-  adapters.py       generated/mock adapter
-  pipeline.py       perception-to-action composition
-  runtime.py        runtime manifest/capability bootstrap
-  cli.py            local CLI
+src/siqoq/          core package
 examples/           실행 가능한 예제
 docs/               설계/운영/개발 문서
 .github/             CI 및 contributor automation
@@ -117,7 +110,7 @@ Sensor Sample, Semantic Event, Action Request 같은 공통 계약을 변경할 
 - action request/result telemetry
 - 실제 장비가 없어도 검증할 test path 제공
 
-현재 skeleton 역시 `NoOpPolicy`와 빈 allow-list를 기본으로 사용해 **명시적으로 허용하지 않은 action은 실행되지 않도록** 구성되어 있습니다.
+현재 skeleton 역시 deterministic `decide()` 정책, `SafetyGate`, `MockActuatorAdapter`만 사용하며 **실제 actuator는 호출하지 않도록** 구성되어 있습니다.
 
 ## 문서 언어 정책
 

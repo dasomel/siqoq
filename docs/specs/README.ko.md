@@ -6,15 +6,18 @@ Siqoq은 구현 core는 작게 유지하되 경계는 명확하게 정의하는 
 
 ## 현재 구현된 스켈레톤
 
-첫 code-level contract skeleton은 다음 파일에 들어가 있습니다.
+code-level contract skeleton은 다음 파일에 들어가 있습니다.
 
-- `src/siqoq/contracts.py` — `SensorSample`, `Detection`, `ActionRequest`, `ActionResult`, `DeviceCapabilities` 및 adapter protocol
+- `src/siqoq/sensors.py` — `SensorSample` 및 `SensorAdapter` protocol
+- `src/siqoq/inference.py` — `Detection` 및 `InferenceAdapter` protocol
 - `src/siqoq/events.py` — versioned `SemanticEvent` envelope
-- `src/siqoq/pipeline.py` — perception → event → policy → safety → action 흐름
-- `src/siqoq/adapters.py` — generated sensor, static inference, in-memory transport, allow-list safety gate, mock action adapter
-- `src/siqoq/runtime.py` — runtime manifest와 dependency-free capability discovery
+- `src/siqoq/transport.py` — event publisher protocol 및 transport
+- `src/siqoq/policy.py` — policy decision 및 safety gate
+- `src/siqoq/actuation.py` — `ActionResult` 및 actuator adapter protocol
+- `src/siqoq/capabilities.py` — best-effort runtime capability discovery
+- `src/siqoq/scenario.py` — fixture 기반 scenario pipeline
 
-이 구현들은 향후 public API를 확정한 것이 아니라 **확장 가능한 최소 골격**입니다. Issue #17에서 versioned specification과 공통 adapter conformance suite로 발전시킵니다.
+이 구현들은 향후 public API를 확정한 것이 아니라 **확장 가능한 최소 골격**입니다. 개별 contract의 versioned v0 초안은 이 디렉터리에 함께 있습니다.
 
 ## 예정된 명세
 
@@ -85,7 +88,7 @@ Siqoq workload를 portable하게 선언하는 형식을 정의합니다.
 - action capability
 - deployment profile
 
-현재 `RuntimeManifest`는 laptop profile bootstrap을 제공하고 `siqoq inspect` 명령으로 확인할 수 있습니다.
+현재는 개요 문서만 있습니다. [Runtime/Capability Contract 개요](runtime-capability-outline.ko.md)를 참고하세요. best-effort host capability는 `siqoq capabilities`로 출력할 수 있습니다.
 
 ### Capability Contract
 

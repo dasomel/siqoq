@@ -11,17 +11,17 @@
 - [아키텍처](architecture.ko.md)
 - [로드맵](roadmap.ko.md)
 - [개발 가이드](development.ko.md)
-- [결정론적 시나리오](scenarios.ko.md)
+- [시나리오·벤치마크 카탈로그](specs/scenario-catalog.md)
+- [테스트](testing.ko.md)
 - [Project Principles](principles.md)
 
 ## 기술 명세
 
 - [Contract specification 로드맵](specs/README.ko.md)
-- Sensor Contract — 예정
-- Semantic Event Contract — 예정
-- Action Contract — 예정
-- Runtime Manifest — 예정
-- Capability Contract — 예정
+- [Sensor Contract](specs/sensor-contract.ko.md)
+- [Semantic Event Contract](specs/semantic-event-contract.ko.md)
+- [Action Contract](specs/action-contract.ko.md)
+- [Runtime/Capability Contract 개요](specs/runtime-capability-outline.ko.md)
 
 ## 문서 정책
 

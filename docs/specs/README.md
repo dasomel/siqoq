@@ -6,15 +6,18 @@ Siqoq should remain small at the implementation core and explicit at its boundar
 
 ## Current implementation skeleton
 
-The first code-level contract skeleton is now implemented in:
+The code-level contract skeleton is implemented in:
 
-- `src/siqoq/contracts.py` — `SensorSample`, `Detection`, `ActionRequest`, `ActionResult`, `DeviceCapabilities`, and adapter protocols
+- `src/siqoq/sensors.py` — `SensorSample` and the `SensorAdapter` protocol
+- `src/siqoq/inference.py` — `Detection` and the `InferenceAdapter` protocol
 - `src/siqoq/events.py` — versioned `SemanticEvent` envelope
-- `src/siqoq/pipeline.py` — perception → event → policy → safety → action composition
-- `src/siqoq/adapters.py` — generated sensor, static inference, in-memory transport, allow-list safety gate, and mock action adapter
-- `src/siqoq/runtime.py` — runtime manifest and dependency-free capability discovery
+- `src/siqoq/transport.py` — event publisher protocol and transports
+- `src/siqoq/policy.py` — policy decision and safety gate
+- `src/siqoq/actuation.py` — `ActionResult` and the actuator adapter protocol
+- `src/siqoq/capabilities.py` — best-effort runtime capability discovery
+- `src/siqoq/scenario.py` — fixture-driven scenario pipeline
 
-These are intentionally minimal scaffolds, not frozen public APIs. Issue #17 will evolve them into explicit versioned specifications and a shared adapter conformance suite.
+These are intentionally minimal scaffolds, not frozen public APIs. Versioned v0 drafts of the individual contracts live alongside this file.
 
 ## Planned specifications
 
@@ -85,7 +88,7 @@ Potential fields:
 - action capabilities
 - deployment profile
 
-The current `RuntimeManifest` provides a laptop-profile bootstrap and can be inspected through `siqoq inspect`.
+This is currently an outline only; see [Runtime/Capability Contract outline](runtime-capability-outline.md). Best-effort host capabilities can be printed with `siqoq capabilities`.
 
 ### Capability Contract
 
