@@ -4,11 +4,9 @@ Siqoq follows the OpenForge context-efficient agent engineering model. It is sti
 
 Inspect only the repository guidance, architecture/development document, matching project skill under `.agents/skills/`, and issue/spec that are relevant to the current task.
 
-
 ## Instruction routing
 
 - `AGENTS.md` is the canonical portable repository contract.
-- Load detailed documents and `.agents/skills/` only when they are relevant to the current task; do not preload them by default.
 - Tool-specific adapters must contain only runtime-specific behavior and must not duplicate this contract.
 - Deterministic requirements belong in scripts, tests, linters, policy, or CI when they can be enforced reliably.
 
