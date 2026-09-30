@@ -55,3 +55,7 @@ container-run:
 container-run-native:
 	docker buildx build --platform linux/$(DOCKER_ARCH) --load -t siqoq:$(DOCKER_ARCH) .
 	docker run --rm siqoq:$(DOCKER_ARCH) demo
+
+.PHONY: research-check
+research-check:
+	python3 scripts/research/check-research-evidence.py
