@@ -15,12 +15,31 @@ import subprocess
 import sys
 import time
 
-
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 CHECKER_PATH = pathlib.Path(__file__).with_name("check-research-evidence.py")
-EVENT_TYPES = ("build", "test", "install", "deploy", "runtime", "recovery", "agent_task", "release", "benchmark")
-SCALAR_METADATA = ("pass_count", "fail_count", "skip_count", "warning_count", "cpu_time_ms",
-                   "peak_memory_mib", "storage_bytes", "artifact_digest", "failure_stage", "recovery_result")
+EVENT_TYPES = (
+    "build",
+    "test",
+    "install",
+    "deploy",
+    "runtime",
+    "recovery",
+    "agent_task",
+    "release",
+    "benchmark",
+)
+SCALAR_METADATA = (
+    "pass_count",
+    "fail_count",
+    "skip_count",
+    "warning_count",
+    "cpu_time_ms",
+    "peak_memory_mib",
+    "storage_bytes",
+    "artifact_digest",
+    "failure_stage",
+    "recovery_result",
+)
 
 
 def checker():
@@ -47,8 +66,12 @@ def safe_label(value: str, *, task: bool = False) -> str:
 
 def environment_label() -> str:
     if os.environ.get("GITHUB_ACTIONS") == "true":
-        return safe_label("github-actions-" + os.environ.get("RUNNER_OS", "unknown") + "-" +
-                          os.environ.get("RUNNER_ARCH", "unknown"))
+        return safe_label(
+            "github-actions-"
+            + os.environ.get("RUNNER_OS", "unknown")
+            + "-"
+            + os.environ.get("RUNNER_ARCH", "unknown")
+        )
     return safe_label("local-" + platform.system().lower() + "-" + platform.machine().lower())
 
 
@@ -63,7 +86,7 @@ def append_record(record: dict[str, object], path: pathlib.Path, root: pathlib.P
     try:
         remaining = memoryview(line)
         while remaining:
-            remaining = remaining[os.write(fd, remaining):]
+            remaining = remaining[os.write(fd, remaining) :]
     finally:
         os.close(fd)
 
@@ -91,9 +114,17 @@ def parse_args() -> argparse.Namespace:
     # label is lost; callers can use test directly to avoid the alias.
     if args.event_type == "verification":
         args.event_type = "test"
-    if args.event_type == "agent_task" and (args.human_interventions is None or args.review_corrections is None):
+    if args.event_type == "agent_task" and (
+        args.human_interventions is None or args.review_corrections is None
+    ):
         parser.error("agent_task requires measured --human-interventions and --review-corrections")
-    for name in ("attempt", "human_interventions", "review_corrections", "ci_retries", *SCALAR_METADATA[:7]):
+    for name in (
+        "attempt",
+        "human_interventions",
+        "review_corrections",
+        "ci_retries",
+        *SCALAR_METADATA[:7],
+    ):
         value = getattr(args, name)
         if value is not None and value < (1 if name == "attempt" else 0):
             parser.error(f"--{name.replace('_', '-')} must be non-negative (attempt starts at 1)")
@@ -114,7 +145,7 @@ def main() -> int:
         print(f"research evidence setup failed: {error}", file=sys.stderr)
         return 2
     start = time.monotonic_ns()
-    timestamp = dt.datetime.now(dt.timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    timestamp = dt.datetime.now(dt.UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
     try:
         completed = subprocess.run(args.command, check=False)
         exit_code = completed.returncode
@@ -136,16 +167,31 @@ def main() -> int:
         if value is not None:
             # D3: Fixed scalar keys prevent raw log structures entering public
             # records. Nested metrics cost a schema update or safe flattening.
-            metadata[name] = validation.SECRET_PATTERN.sub("[REDACTED]", value) if isinstance(value, str) else value
+            metadata[name] = (
+                validation.SECRET_PATTERN.sub("[REDACTED]", value)
+                if isinstance(value, str)
+                else value
+            )
     record = {
-        "schema_version": "1.0", "timestamp": timestamp, "repository": slug, "revision": revision,
-        "event_type": args.event_type, "task_or_test": task, "result": result,
-        "duration_ms": duration_ms, "environment": environment, "attempt": args.attempt,
+        "schema_version": "1.0",
+        "timestamp": timestamp,
+        "repository": slug,
+        "revision": revision,
+        "event_type": args.event_type,
+        "task_or_test": task,
+        "result": result,
+        "duration_ms": duration_ms,
+        "environment": environment,
+        "attempt": args.attempt,
         "human_interventions": args.human_interventions or 0,
         "review_corrections": args.review_corrections or 0,
-        "ci_retries": args.ci_retries, "metadata": metadata,
+        "ci_retries": args.ci_retries,
+        "metadata": metadata,
     }
-    path = pathlib.Path(os.environ.get("RESEARCH_EVIDENCE_DIR", ROOT / "research/evidence")) / f"{timestamp[:7]}.jsonl"
+    path = (
+        pathlib.Path(os.environ.get("RESEARCH_EVIDENCE_DIR", ROOT / "research/evidence"))
+        / f"{timestamp[:7]}.jsonl"
+    )
     try:
         append_record(record, path)
     except (OSError, ValueError) as error:
