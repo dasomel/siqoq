@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "openforge-agent-skill-verification/v1",
+  "skill": "siqoq-sim-to-edge-workflow",
+  "skillVersion": "1",
+  "freshSession": true,
+  "agentRuntime": "claude-sonnet-5-5 (Claude Code subagent)",
+  "happyPath": {
+    "status": "pass",
+    "summary": "Fresh-session replay (dasomel/openforge#54, 2026-10-04) activated the skill from its description for a recorded-fixture -> semantic event -> policy task, followed its workflow, and ran the real hardware-free path: `siqoq demo` and `siqoq scenario run` over the recorded fixture (3 object.detected events, exit 0) plus event -> decide() -> MockActuatorAdapter (outcome executed, mock=True). Analysis only; no source change.",
+    "evidence": [
+      "research/issue-54-siqoq-sim-to-edge-workflow-replay-2026-10-04.md#step-2-happy-path-scratch-only"
+    ]
+  },
+  "edgeCase": {
+    "status": "pass",
+    "summary": "Flipped the reviewed MockAction.mock default from True to False in src/siqoq/policy.py (skill step 7 / D1 actuator-safety boundary); the repository's own pytest suite failed with exit 1 (3 tests), the change was reverted with git checkout, and pytest returned to exit 0.",
+    "evidence": [
+      "research/issue-54-siqoq-sim-to-edge-workflow-replay-2026-10-04.md#step-3-failureedge-case-real-project-specific-hazard"
+    ]
+  },
+  "deterministicChecks": [
+    { "command": "make verify", "status": "pass" }
+  ],
+  "unverified": [
+    "USB webcam, OpenCV/ONNX Runtime, and NATS/MQTT adapters (optional extras not installed, no hardware/broker); make verify-full was not run.",
+    "Jetson/ARM, TensorRT, ROS 2, Kubernetes/K3s, container builds, and real GPIO/actuator behaviour were not exercised; only mock adapters ran.",
+    "Only one hazard (MockAction.mock default) was mutated live; the policy-never-imports-actuation guard was not mutated."
+  ],
+  "verifiedAt": "2026-10-04"
+}
