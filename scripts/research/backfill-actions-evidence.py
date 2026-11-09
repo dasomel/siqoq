@@ -13,12 +13,29 @@ import re
 import subprocess
 import sys
 
-
 CHECKER_PATH = pathlib.Path(__file__).with_name("check-research-evidence.py")
-RUN_FIELDS = ("id", "name", "path", "head_sha", "head_branch", "event", "status", "conclusion",
-              "run_attempt", "run_started_at", "updated_at")
-RESULTS = {"success": "pass", "failure": "fail", "timed_out": "fail", "startup_failure": "fail",
-           "cancelled": "cancelled", "skipped": "skipped", "neutral": "skipped"}
+RUN_FIELDS = (
+    "id",
+    "name",
+    "path",
+    "head_sha",
+    "head_branch",
+    "event",
+    "status",
+    "conclusion",
+    "run_attempt",
+    "run_started_at",
+    "updated_at",
+)
+RESULTS = {
+    "success": "pass",
+    "failure": "fail",
+    "timed_out": "fail",
+    "startup_failure": "fail",
+    "cancelled": "cancelled",
+    "skipped": "skipped",
+    "neutral": "skipped",
+}
 
 
 def checker():
@@ -36,9 +53,19 @@ def fetch_runs(slug: str) -> list[dict]:
     # silently truncate history. Completed runs are selected locally; cost is a few extra pages.
     # --jq keeps only whitelisted scalar fields, so actors/titles never enter this process.
     fields = ",".join(f"{name}:.{name}" for name in RUN_FIELDS)
-    out = subprocess.run(["gh", "api", "--paginate", f"repos/{slug}/actions/runs?per_page=100",
-                          "--jq", ".workflow_runs[] | {" + fields + "}"],
-                         check=True, capture_output=True, text=True).stdout
+    out = subprocess.run(
+        [
+            "gh",
+            "api",
+            "--paginate",
+            f"repos/{slug}/actions/runs?per_page=100",
+            "--jq",
+            ".workflow_runs[] | {" + fields + "}",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
     return [json.loads(line) for line in out.splitlines() if line.strip()]
 
 
@@ -65,7 +92,11 @@ def event_type(run: dict) -> str:
 
 
 def task_label(run: dict) -> str:
-    name = re.sub(r"[^A-Za-z0-9_.:/() -]", "-", str(run.get("name") or pathlib.PurePosixPath(run.get("path") or "").stem))
+    name = re.sub(
+        r"[^A-Za-z0-9_.:/() -]",
+        "-",
+        str(run.get("name") or pathlib.PurePosixPath(run.get("path") or "").stem),
+    )
     return "gha:" + (name or "unknown")[:155]
 
 
@@ -81,20 +112,36 @@ def build_record(run: dict, slug: str, default_branch: str, backfilled_at: str) 
     if duration is not None and duration < 0:
         duration = None
     return {
-        "schema_version": "1.0", "timestamp": run["run_started_at"], "repository": slug,
-        "revision": run["head_sha"], "event_type": event_type(run), "task_or_test": task_label(run),
-        "result": result, "duration_ms": duration, "environment": "github-actions", "attempt": attempt,
-        "human_interventions": 0, "review_corrections": 0, "ci_retries": attempt - 1,
+        "schema_version": "1.0",
+        "timestamp": run["run_started_at"],
+        "repository": slug,
+        "revision": run["head_sha"],
+        "event_type": event_type(run),
+        "task_or_test": task_label(run),
+        "result": result,
+        "duration_ms": duration,
+        "environment": "github-actions",
+        "attempt": attempt,
+        "human_interventions": 0,
+        "review_corrections": 0,
+        "ci_retries": attempt - 1,
         # D4: Scalars only; no titles, commit messages or actor names reach the public record.
-        "metadata": {"source": "github-actions-backfill", "gh_run_id": run["id"], "gh_run_attempt": attempt,
-                     "gh_event": run.get("event"), "workflow_path": run.get("path"),
-                     "head_branch_is_default": run.get("head_branch") == default_branch,
-                     "duration_source": "run_started_at_to_updated_at", "backfilled_at": backfilled_at,
-                     # D8: v1 requires integer counters. Zero is a schema placeholder, not an
-                     # observation; exclude these counters from analysis unless measured elsewhere.
-                     # Cost: consumers must filter these flags; escape: a future nullable schema.
-                     "human_interventions_observed": False, "review_corrections_observed": False,
-                     "duration_semantics": "workflow_update_interval"},
+        "metadata": {
+            "source": "github-actions-backfill",
+            "gh_run_id": run["id"],
+            "gh_run_attempt": attempt,
+            "gh_event": run.get("event"),
+            "workflow_path": run.get("path"),
+            "head_branch_is_default": run.get("head_branch") == default_branch,
+            "duration_source": "run_started_at_to_updated_at",
+            "backfilled_at": backfilled_at,
+            # D8: v1 requires integer counters. Zero is a schema placeholder, not an
+            # observation; exclude these counters from analysis unless measured elsewhere.
+            # Cost: consumers must filter these flags; escape: a future nullable schema.
+            "human_interventions_observed": False,
+            "review_corrections_observed": False,
+            "duration_semantics": "workflow_update_interval",
+        },
     }
 
 
@@ -114,23 +161,39 @@ def existing_keys(*directories: pathlib.Path) -> set[tuple[int, int]]:
 
 
 def on_main(root: pathlib.Path, sha: str, cache: dict[str, bool]) -> bool:
-    # D2: Only commits reachable from origin/main, so the validator's local commit check passes in CI.
+    # D2: Only commits reachable from origin/main, so the validator's local commit check
+    # passes in CI.
     if sha not in cache:
-        result = subprocess.run(["git", "merge-base", "--is-ancestor", sha, "origin/main"], cwd=root,
-                                capture_output=True)
+        result = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", sha, "origin/main"],
+            cwd=root,
+            capture_output=True,
+        )
         # Missing PR commits are expected; a missing main ref is checked before conversion.
         cache[sha] = result.returncode == 0
     return cache[sha]
 
 
-def convert(runs: list[dict], root: pathlib.Path, slug: str, since: dt.date | None, known: set,
-            default_branch: str = "main", backfilled_at: str | None = None, exclude_paths: tuple[str, ...] = ()):
-    backfilled_at = backfilled_at or dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+def convert(
+    runs: list[dict],
+    root: pathlib.Path,
+    slug: str,
+    since: dt.date | None,
+    known: set,
+    default_branch: str = "main",
+    backfilled_at: str | None = None,
+    exclude_paths: tuple[str, ...] = (),
+):
+    backfilled_at = backfilled_at or dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     stats = collections.Counter()
     # D9: Fail on a missing baseline instead of reporting a successful empty export.
     # Cost: one local Git call; escape: fetch origin/main and retry.
-    subprocess.run(["git", "rev-parse", "--verify", "origin/main^{commit}"], cwd=root,
-                   check=True, capture_output=True)
+    subprocess.run(
+        ["git", "rev-parse", "--verify", "origin/main^{commit}"],
+        cwd=root,
+        check=True,
+        capture_output=True,
+    )
     known = set(known)
     cache: dict[str, bool] = {}
     records = []
@@ -155,7 +218,11 @@ def convert(runs: list[dict], root: pathlib.Path, slug: str, since: dt.date | No
             stats["skipped_existing"] += 1
         elif not on_main(root, run["head_sha"], cache):
             stats["excluded_not_on_main"] += 1
-            stats["not_on_main_pull_request" if run.get("event") == "pull_request" else "not_on_main_other_event"] += 1
+            stats[
+                "not_on_main_pull_request"
+                if run.get("event") == "pull_request"
+                else "not_on_main_other_event"
+            ] += 1
         else:
             records.append(record)
             known.add((run["id"], run["run_attempt"]))
@@ -188,10 +255,19 @@ def write_records(records: list[dict], output_dir: pathlib.Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=pathlib.Path, default=pathlib.Path.cwd())
-    parser.add_argument("--output-dir", type=pathlib.Path, help="default: <repo-root>/research/evidence")
-    parser.add_argument("--since", type=dt.date.fromisoformat, help="only runs started on/after YYYY-MM-DD")
-    parser.add_argument("--exclude-path", action="append", default=[], metavar="WORKFLOW_PATH",
-                        help="skip runs of this workflow file, e.g. .github/workflows/x.yml (repeatable)")
+    parser.add_argument(
+        "--output-dir", type=pathlib.Path, help="default: <repo-root>/research/evidence"
+    )
+    parser.add_argument(
+        "--since", type=dt.date.fromisoformat, help="only runs started on/after YYYY-MM-DD"
+    )
+    parser.add_argument(
+        "--exclude-path",
+        action="append",
+        default=[],
+        metavar="WORKFLOW_PATH",
+        help="skip runs of this workflow file, e.g. .github/workflows/x.yml (repeatable)",
+    )
     parser.add_argument("--dry-run", action="store_true", help="print counts only")
     args = parser.parse_args()
     root = args.repo_root.resolve()
@@ -200,9 +276,14 @@ def main() -> int:
     try:
         slug = validation.repository_slug(root)
         runs = fetch_runs(slug)
-        known = existing_keys(*(path for path in (root / "research/evidence", output_dir) if path.is_dir()))
-        records, stats = convert(runs, root, slug, args.since, known, exclude_paths=tuple(args.exclude_path))
-        # D7: Every record is validated before anything is written; one invalid record aborts the run.
+        known = existing_keys(
+            *(path for path in (root / "research/evidence", output_dir) if path.is_dir())
+        )
+        records, stats = convert(
+            runs, root, slug, args.since, known, exclude_paths=tuple(args.exclude_path)
+        )
+        # D7: Every record is validated before anything is written; one invalid record aborts
+        # the run.
         for record in records:
             errors = validation.record_errors(record, root, slug)
             if errors:
@@ -214,7 +295,12 @@ def main() -> int:
         print(f"backfill failed: {error} {detail}".strip(), file=sys.stderr)
         return 2
     per_month = collections.Counter(record["timestamp"][:7] for record in records)
-    print(json.dumps({"repository": slug, **stats, "per_month": dict(sorted(per_month.items()))}, sort_keys=True))
+    print(
+        json.dumps(
+            {"repository": slug, **stats, "per_month": dict(sorted(per_month.items()))},
+            sort_keys=True,
+        )
+    )
     if not args.dry_run:
         print(f"backfill: wrote {len(records)} records to {output_dir}", file=sys.stderr)
     return 0
